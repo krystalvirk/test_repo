@@ -1,0 +1,297 @@
+---
+title: "Project 2: Modeling, Testing, and Predicting"
+author: "Krystal Virk"
+date: "11/17/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+hook_output = knit_hooks$get('output')
+knit_hooks$set(output = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
+  }
+  hook_output(x, options)
+})
+
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE,fig.align="center",warning=FALSE,message=FALSE,fig.width=8, fig.height=5, linewidth=60)
+options(tibble.width = 100,width = 100)
+library(tidyverse)
+```
+
+## Krystal Virk: Leukemia Project 2 Analysis
+## Kv6653
+
+
+## - **0. (5 pts)** Introduce your dataset and each of your variables (or just your main variables if you have lots) in a paragraph. What are they measuring? How many observations?
+```{r}
+library(readr)
+library(dplyr)
+Leukemia <- read_csv("Leukemia.csv")
+Leukemia<-Leukemia%>%select(-X1)
+head(Leukemia)
+```
+*The Leukemia dataset that I am using for this project contains 9 variables and 51 observations. This dataset contains information regarding treatment results for leukemia patients. The variable "age" represents the age of diagnosis of the patient, and "time" represents the survival time after being diagnosed, as measured in months.The "smear" variable represents the differential percentage of blasts. Blasts are imperative to the diagnosis of leukemia as having 20% or more blasts in the bone marrow or blood means a patient has the acute leukemia diagnosis.The "blasts" variable is a record of the absolute number of blasts for each patient. The variable "infil" returns the percentage of absolute marrow leukemia infiltrate, and "index" is the percentage labeling index of the plasma leukemia cells in the bone marrow. The "temp" variable is a measure of the highest temperature recorded of the patient prior to their treatment. "Resp" refers to whether the patient successfully responded to the treatment, with one implying the treatment was successful, and zero suggesting a failed response. The "status" variable is representative of whether the patient survived this diagnosis or not, with one meaning survival and zero being that they passed away.*
+
+- **1. (15 pts)** Perform a MANOVA testing whether any of your numeric variables (or a subset of them, if including them all is unreasonable or doesn't make sense) show a mean difference across levels of one of your categorical variables (3). If they do, perform univariate ANOVAs to find response(s) showing a mean difference across groups (3), and perform post-hoc t tests to find which groups differ (3). Discuss the number of tests you have performed, calculate the probability of at least one type I error (if unadjusted), and adjust the significance level accordingly (bonferroni correction) before discussing significant differences (3). Briefly discuss MANOVA assumptions and whether or not they are likely to have been met (no need for anything too in-depth) (2).
+```{r}
+set.seed(1234)
+Leukemia<-Leukemia %>% mutate(Resp=recode(Resp, "1"="Success", "0"="Reject"))
+man1<-manova(cbind(Age,Smear,Infil,Index,Blasts,Temp,Time,Status)~Resp, data=Leukemia)
+summary(man1)
+summary.aov(man1) 
+Leukemia%>% group_by(Resp)%>% summarize(mean(Age), mean(Smear), mean(Infil), mean(Index), mean(Blasts), mean(Temp), mean(Time), mean(Status))
+pairwise.t.test(Leukemia$Age, Leukemia$Resp, p.adj = "none")
+pairwise.t.test(Leukemia$Index, Leukemia$Resp, p.adj = "none")
+pairwise.t.test(Leukemia$Time, Leukemia$Resp, p.adj = "none")
+pairwise.t.test(Leukemia$Status, Leukemia$Resp, p.adj = "none")
+1-(.95^6) #The probability of having at least one Type 1 Error
+.05/6 #Bonferroni α Method
+library(rstatix)
+group <- Leukemia$Resp
+DVs <- Leukemia %>% select(Age,Smear,Infil,Index,Blasts,Temp,Time)
+sapply(split(DVs,group), mshapiro_test)#Tests multivariate normality for each group (null: assumption met)
+```
+*I ran a total of 6 tests including one MANOVA and one ANOVA test on the dataset, in addition to 4 pairwise t-tests. A one-way MANOVA was conducted to determine the effect of the patients’ response to the treatment (whether it was successful or if their body rejected it) on eight dependent variables.The MANOVA returned a significant p-value of 3.821e-09, suggesting that significant differences were found among the response to treatment for at least one of the dependent variables. Similarly after running the univariate ANOVA, the test returned significant p-values for the following variables of age, index, time, and status. F(1, 49) = 6.846, p < .05 for age, F(1, 49) = 15.333, p < .001 for index, F(1, 49) = 69.583, p < .001 for time, and F(1, 49) = 8.647, p < .01 for status respectively. To correct for multiple comparisons since running multiple tests inflates the overall error rate, the probability of having at least one type 1 error was calculated. The type 1 error rate for this data was found to be 0.265. To ensure that the overall error rate remained at 5%, the Bonferroni value of correction was calculated as being .00833 to adjust for the significance level of each test used. Using this new value, the previous variable of age was no longer significant. I ran further post hoc analysis by conducting pairwise comparisons on the variables that returned significance. This was an additional step to demonstrate my understanding of the pairwise t-test, however this was not necessary to analyze the data as the reference variable (response to treatment) only has two groups. The MANOVA test has multiple assumptions, such as multivariate normality and homogeneity of covariance matrices, that must be tested. To check these assumptions I tested for multivariate normality for each of the variables. This returned p-values less than 0.05 which means that the main assumptions including multivariate normality were violated. This is not an unusual finding, as running MANOVAS typically violate at least one assumption.*
+
+- **2. (10 pts)** Perform some kind of randomization test on your data (that makes sense). The statistic can be anything you want (mean difference, correlation, F-statistic/ANOVA, chi-squared), etc. State null and alternative hypotheses, perform the test, and interpret the results (7). Create a plot visualizing the null distribution and the test statistic (3).
+```{r}
+set.seed(1234)
+summary(aov(Age~Status,data=Leukemia))
+obs_F<-4.924
+Fs<-replicate(5000,{
+  newleuk<-Leukemia%>%mutate(Age=sample(Age)) 
+  SSW<- newleuk%>%group_by(Status)%>%summarize(SSW=sum((Age-mean(Age))^2))%>%
+    summarize(sum(SSW))%>%pull
+  SSB<- newleuk%>%mutate(mean=mean(Age))%>%group_by(Status)%>%mutate(groupmean=mean(Age))%>%
+    summarize(SSB=sum((mean-groupmean)^2))%>%summarize(sum(SSB))%>%pull
+  (SSB/1)/(SSW/49)
+})
+## Histogram visualizing this null distribution
+hist(Fs, prob=T); abline(v = obs_F, col="red")
+mean(Fs>obs_F)
+```
+*To conduct a randomization test on this data, I calculated an F-statistic to determine how the sample was distributed. I specifically was looking at the relationship between age of diagnosis and the resulting status of the patient. The null hypothesis is that the true mean of age is the same for all three groups. An alternative hypothesis is that variation is present across the group means as there is not a shared mean. The F-statistic is a calculation of the ratio of variance explained to that of the unexplained variance. If the F-statistic is large, this means that the null hypothesis can be rejected because this implies that there is great variation between the groups. However, if the F-statistic returns a small value then this means that groups are not significantly different from one another. The assumptions for this test include that the samples must be independent, and the populations from which the samples are obtained must also be normal. Therefore, there should be independent observations and samples, normal distribution, and equal variance. When the population means of the groups are different, an F-value greater than one is generated. The observed F-statistic for this data was 4.924. After scrambling up the data and running this test repeatedly, multiple F-statistics were generated. These 5,000 F-statistics are depicted in the histogram above which visualizes this data. On the histogram the red line depicts the observed value. The calculated F-statistic was 2.774, which is not larger than the F-statistic value of 4.924. The null hypothesis cannot immediately be rejected for this reason. However, upon calculating the p-value, this data returned a value of 0.0308 which is significant since it is less than 0.05. Since the F-statistic ultimately is a comparison of the joint effect of all the variables combined, it is imperative to analysis but it is not the deciding factor of significance. The null hypothesis can therefore be rejected and it can be concluded that the groups do indeed differ. The plot also does a great job of visualizing that some of the 5,000 F-statistic observations generated under the null hypothesis are greater than the actual F-statistic.*
+
+- **3. (35 pts)** Build a linear regression model predicting one of your response variables from at least 2 other variables, including their interaction. Mean-center any numeric variables involved in the interaction.
+
+    - Interpret the coefficient estimates (do not discuss significance) (10)
+    - Plot the regression using `ggplot()` using geom_smooth(method="lm"). If your interaction is numeric by numeric, refer to code in the slides to make the plot or check out the `interactions` package, which makes this easier. If you have 3 or more predictors, just chose two of them to plot for convenience. (8)
+    - Check assumptions of linearity, normality, and homoskedasticity either graphically or using a hypothesis test (4)
+    - Regardless, recompute regression results with robust standard errors via `coeftest(..., vcov=vcovHC(...))`. Discuss significance of results, including any changes from before/after robust SEs if applicable. (8)
+    - What proportion of the variation in the outcome does your model explain? (4)
+```{r}
+set.seed(1234)
+library(interactions)
+library(ggplot2)
+library(dplyr)
+library(readr)
+library(sandwich)
+library(lmtest)
+library(zoo)
+Leukemia$Infil_c <- Leukemia$Infil - mean(Leukemia$Infil)
+Leukemia$Age_c <- Leukemia$Age - mean(Leukemia$Age)
+fit3<-lm(Age_c ~ Infil_c* Resp, data=Leukemia)
+summary(fit3)
+mutate(Leukemia, Age = case_when(Age<40 ~"Age_young", Age<=59~"Age_middle", Age<=80~"Age_old"))->Leukemia1 #creating categories within age to make its interaction interpretation more meaningful
+fit10<-lm(Infil_c ~ Age * Resp, data=Leukemia1)
+summary(fit10)
+Leukemia%>%select(Age,Infil,Resp)%>%na.omit%>% 
+  mutate(y=ifelse(Resp=="Success",1,0),
+         Age_c=Age-mean(Age),
+         Infil_c=Infil-mean(Infil)) -> Leukemia2
+view(Leukemia2)
+fit5 <- lm(y~Age_c*Infil_c,data=Leukemia2,family="binomial")
+summary(fit5)
+interact_plot(fit5,pred= Age_c, modx= Infil_c)
+ggplot(Leukemia, aes(Age_c,Infil_c, color = Resp)) + geom_smooth(method = "lm", se = F, fullrange = T)+ geom_point()+geom_vline(xintercept=0,lty=2) # added this graph as an additional visual for these relationships!
+resids<-fit3$residuals; fitvals<-fit3$fitted.values
+ggplot()+geom_point(aes(fitvals,resids))+geom_hline(yintercept=0, col="red")
+bptest(fit3)
+ggplot()+geom_histogram(aes(resids))
+ggplot()+geom_qq(aes(sample=resids))
+ks.test(resids, "pnorm", sd=sd(resids))
+coeftest(fit3)
+coeftest(fit3, vcov = vcovHC(fit3))
+summary(fit3)
+fit3<-lm(Age_c ~ Infil_c* Resp, data=Leukemia)
+summary(fit3)
+(sum((Leukemia$Age_c-mean(Leukemia$Age_c))^2)-sum(fit3$residuals^2))/sum((Leukemia$Age_c-mean(Leukemia$Age_c))^2)
+```
+*For this linear regression I thought it would be interesting to look at the interaction between a patient’s age of diagnosis, their amount of leukemic infiltrate in their bone marrow, and whether their body rejected or successfully responded to treatment. I mean centered both of my numeric variables for age and infil so that the coefficients could now be interpreted at average values rather than at zero. After running the linear regression, the slope of successful treatment response on the amount of leukemic infiltrate in patients was 0.066 greater than for patients with an average rejection response to treatment. The coefficient variables that were returned after running this regression were interesting in that there was a significant p-value for the success treatment variable, however it was not very specific in that the age of patients was not clearly explained by these results. Age was the reference variable in this interaction, therefore it was difficult to try and interpret the intercept. To further analyze these results I mutated the age column in my dataset so that patients who were diagnosed with leukemia from the ages of 20-39 were categorized as being young. Patients whose prognosis was discovered between the ages of 40-59 were deemed middle age, and those patients who fell within the category of 60-80 years were termed old age. After doing this, I re-ran another linear regression so that I could explain this interaction better, now specifying how the different ages of patients impacted treatment. I wanted to use the mean-centered values for my variables and it was difficult to run the follow-up tests with two categorical variables, so for this reason I provided this additional linear regression to explain my findings better! After running this interaction, the mean predicted leukemic infiltrate for middle-aged patients with average treatment rejection response was -0.014. Old patients with average rejection response to treatment have a predicted percentage of leukemic infiltrate that is 11.098 lower than middle-aged patients with an average rejection response to treatment. Younger patients with average rejection response to treatment have a predicted percentage of leukemic infiltrate that is 3.432 lower than middle-aged patients with an average rejection response to their treatments. The slope of successful response to treatment on the amount of leukemic infiltrate present in older patients is 17.773 greater than for middle-aged patients with an average rejection response to treatment. Additionally, the slope of successful response on leukemic infiltrate for younger patients is 9.580 greater than for middle-aged patients with an average rejection response. The BP test returned a p-value of 0.429 which means that the residuals have constant variance. Since this value is well above 0.05, the null hypothesis of homoscedasticity cannot be rejected. The assumption of linearity looks invalid after eyeballing the plot of resids and fitvals as the variance on the plot does not appear constant. Plotting the residuals is helpful to visualize the difference between the observed value and the mean value predicted for a particular observation. However, after looking at the histogram of residuals and the plot, the assumption of normality appears to be valid. This was further confirmed after running a one-sample Kolmogorov-Smirnov test as the p-value was 0.941. Since this p-value was greater than 0.05, this data evidently follows a normal distribution. Prior to correcting for heteroskedasticity, the p-value for successful response to treatment was 0.02018, but after using the robust standard errors it was 0.02460, which is still statistically significant. The t-value as well as the standard error slightly increased. None of the values for the coefficient estimates changed after correcting for robust standard errors, there should only be discrepancies in the p-value, t-value, and standard error if applicable. When the robust standard errors were used with this new data, the p-value remained significant, likely due to this data originally meeting homoscedasticity. After correcting for the robust standard errors, the p-value for leukemia infiltrate as well as the standard error decreased slightly while the t-value increased. This interaction was not significant before or after correcting for these errors. After correcting for standard error, the slope of successful treatment response on leukemia infiltrate still had a value of 0.066, but the p-value as well as standard error decreased while the t-value increased. The R-squared value is the proportion of variation in the response variable explained by the overall model. Therefore, 12.64% of variability in the patients’ response to treatment is explained.*
+
+
+- **4. (5 pts)** Rerun same regression model (with the interaction), but this time compute bootstrapped standard errors (either by resampling observations or residuals). Discuss any changes you observe in SEs and p-values using these SEs compared to the original SEs and the robust SEs)
+```{r}
+set.seed(1234)
+boot_dat<- sample_frac(Leukemia, replace=T)
+samp_distn<-replicate(5000, {
+  boot_dat <- sample_frac(Leukemia, replace=T)
+  fit4 <- lm(Age_c ~ Infil_c* Resp, data=boot_dat)
+  coef(fit4) 
+ })
+samp_distn %>% t %>% as.data.frame %>% summarize_all(sd)
+fit4 <- lm(Age_c ~ Infil_c* Resp, data=boot_dat)
+summary(fit4)
+coeftest(fit4, vcov = vcovHC(fit4))
+```
+*I reran the linear regression from above, but now I have computed the bootstrapped errors by resampling the observations. The bootstrapped standard error of approximately 5.13 is just slightly larger when compared across the values of 4.65 and 4.82 for the computed normal and robust standard errors respectively. It is worthwhile to note that there was a small discrepancy between the coefficient estimates after running this bootstrapped data most likely due to the random sampling of data when this regression was run. The p-value for the successful response variable prior to using the bootstrapped standard error was 0.02018 and after accounting for these errors it was approximately 0.0345 so it remained significant. The standard error and p-value increased, while the t-value slightly decreased after bootstrapping. This was similar when looking at the correction that was done using the robust standard errors as well.This overall linear regression was not significant as is evident by the resulting values for the infiltrate variable as well as the slope of successful treatments on percentage of leukemic infiltrate present in the body.*
+
+
+- **5. (25 pts)** Fit a logistic regression model predicting a binary variable (if you don't have one, make/get one) from at least two explanatory variables (interaction not necessary). 
+
+    - Interpret coefficient estimates in context (10)
+    - Report a confusion matrix for your logistic regression (2)
+    - Compute and discuss the Accuracy, Sensitivity (TPR), Specificity (TNR), Precision (PPV), and AUC of your model (5)
+    - Using ggplot, make a density plot of the log-odds (logit) colored/grouped by your binary outcome variable (3)
+    - Generate an ROC curve (plot) and calculate AUC (either manually or with a package); interpret (5)
+```{r}
+
+library(tidyverse)
+library(glmnet)
+library(Matrix)
+
+## GIVE IT PREDICTED PROBS AND TRUTH LABELS (0/1), RETURNS VARIOUS DIAGNOSTICS
+
+class_diag <- function(probs,truth){
+#CONFUSION MATRIX: CALCULATE ACCURACY, TPR, TNR, PPV
+
+if(is.character(truth)==TRUE) truth<-as.factor(truth)
+if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE) truth<-as.numeric(truth)-1
+
+tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),factor(truth, levels=c(0,1)))
+acc=sum(diag(tab))/sum(tab)
+sens=tab[2,2]/colSums(tab)[2]
+spec=tab[1,1]/colSums(tab)[1]
+ppv=tab[2,2]/rowSums(tab)[2]
+f1=2*(sens*ppv)/(sens+ppv)
+
+#CALCULATE EXACT AUC
+ord<-order(probs, decreasing=TRUE)
+probs <- probs[ord]; truth <- truth[ord]
+
+TPR=cumsum(truth)/max(1,sum(truth)) 
+FPR=cumsum(!truth)/max(1,sum(!truth))
+
+dup<-c(probs[-1]>=probs[-length(probs)], FALSE)
+TPR<-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1)
+n <- length(TPR)
+auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+
+data.frame(acc,sens,spec,ppv,f1,auc)
+}
+
+
+fit6 <- glm(Status ~ Smear + Index, data = Leukemia1 , family = binomial(link = "logit"))
+coeftest(fit6)
+exp(coef(fit6))
+prob <- predict(fit6, type = "response")
+class_diag(prob, Leukemia1$Status)
+table(prediction = as.numeric(prob > 0.5))
+Leukemia4 <- Leukemia1 %>% mutate(prob = predict(fit6, type = "response"), prediction = ifelse(prob > 
+                                                                                         0.5, 1, 0))
+classify <- Leukemia4 %>% transmute(prob, prediction, 
+                                  truth = Status)
+classify
+table(prediction = classify$prediction, truth = classify$truth) %>% 
+  addmargins()
+mean(Leukemia4[Leukemia4$Status == 1, ]$prob > 0.5)#TPR (Sensitivity)
+mean(Leukemia4[Leukemia4$Status == 0, ]$prob < 0.5)#TNR (Specificity)
+45/51 #Accuracy calculation
+0 #Precision (PPV)
+library(plotROC)
+ROCplot <- ggplot(Leukemia4) + geom_roc(aes(d = Status, m = prob), 
+                                       n.cuts = 0)
+ROCplot
+calc_auc(ROCplot)
+0.652 #AUC value
+
+Leukemia4$logit<-predict(fit6, type = "link")
+Leukemia4 %>% mutate(Status=recode(Status, "1"="Alive", "0"="Deceased"))->Leukemia5
+Leukemia5%>%ggplot(aes(logit,color=Status,fill= Status))+geom_density(alpha=.4)+
+  theme(legend.position=c(.85,.85))+geom_vline(xintercept=0)+xlab("predictor (logit)")
+
+
+```
+*Controlling for index, smear has a slightly greater impact on the status of the patient. Smear refers to the percentage of blasts in the bone marrow or blood of patients, and when index is not being considered there is an increase of 0.036 therefore smear has a postive impact on the likelihood of a patients' final outcome. Controlling for the smear variable, index has a relatively small impact, there is only a 0.003 increase, on whether a patient recovers or unfortunately passes away from this diagnosis. Controlling for smear, for every one increase in the percentage of labeling index of plasma cells in the bone marrow, the odds of a patient's status increases by 1.003. Controlling for index, for every one additional increase in the smear percentage of blasts in a patient's body, the odds of their status increase by 1.036. A confusion matrix reports the table of model predictions versus the true outcomes. After generating the confusion matrix for this data, the accuracy was computed by dividing: 45/51 to get a value of 0.882. Sensitivity is the true positive rate, and this was calculated to be zero. Specificity is the true negative rate, and this was found to be 1. After plotting the ROC curve which depicts the true positive rate and the false positive rate, the area under the curve was computed to be 0.652. This AUC value falls within the category of being a 'poor' variable. AUC values closer to 1.0 are better values and are stronger predictors of a model than those less than or close to 0.5.*
+
+
+- **6. (25 pts)** Perform a logistic regression predicting the same binary response variable from *ALL* of the rest of your variables (the more, the better!) 
+
+    - Fit model, compute in-sample classification diagnostics (Accuracy, Sensitivity, Specificity, Precision, AUC), and interpret (5)
+    - Perform 10-fold (or repeated random sub-sampling) CV with the same model and report average out-of-sample classification diagnostics (Accuracy, Sensitivity, Specificity, Precision, and AUC); interpret AUC and compare with the in-sample metrics (10)
+    - Perform LASSO on the same model/variables. Choose lambda to give the simplest model whose accuracy is near that of the best (i.e., `lambda.1se`). Discuss which variables are retained. (5)
+    - Perform 10-fold CV using only the variables lasso selected: compare model's out-of-sample AUC to that of your logistic regressions above (5)
+
+
+```{r}
+library(glmnet)
+Leukemia %>% mutate(Resp=recode(Resp, "Success"="1", "Reject"="0"))->Leukemia6
+fit7 <- glm(Status ~ Smear+Index+Age+Infil+Blasts+Temp+Resp+Time, data = Leukemia6 , family = "binomial")
+coeftest(fit7)
+exp(coef(fit7))
+prob2<-predict(fit7,data="response")
+class_diag(prob2,Leukemia6$Status)
+table(prediction = as.numeric(prob2 > 0.5))
+set.seed(1234)
+k =3
+data <- Leukemia6[sample(nrow(Leukemia6)), ]
+folds <- cut(seq(1:nrow(data)), breaks=k, labels=F)
+diags <- NULL
+for (i in 1:k) {
+  train <- data[folds != i, ]
+  test <- data[folds == i,]
+  truth <- test$Status
+  fit8 <- glm(Status ~ Smear+Age+Index+Infil+Blasts+Temp+Time, data=train, family = binomial("logit"),maxit=100)
+  probs <- predict(fit8, newdata = test, type = "response")
+  diags <- rbind(diags, class_diag(probs, truth))
+}
+summarize_all(diags,mean)
+
+library(glmnet)
+set.seed(1234)
+leuk_resp <- as.matrix(Leukemia6$Status)  
+leuk_preds <- model.matrix(Status ~ Smear+Age+Index+Infil+Blasts+Temp+Resp+Time, data =Leukemia6)[, -1]
+leuk_preds<-scale(leuk_preds)
+cv <- cv.glmnet(leuk_preds, leuk_resp, family = "binomial")
+lasso_fit <- glmnet(leuk_preds, leuk_resp, family = "binomial", 
+                    lambda = cv$lambda.1se)
+coef(lasso_fit)
+probs3 <- predict(lasso_fit, leuk_preds, type = "response")
+class_diag(probs3, Leukemia6$Status)
+
+set.seed(1234)
+k = 3
+data1 <- Leukemia6[sample(nrow(Leukemia6)), ]
+folds <- cut(seq(1:nrow(data1)), breaks = k, labels = F)
+diags2 <- NULL
+
+for (i in 1:k) {
+  train <- data1[folds != i, ]
+  test <- data1[folds == i, ]
+  truth <- test$Status
+  fit11 <- glm(Status ~ Time, 
+             data = train, family = "binomial")
+  probs4 <- predict(fit11, newdata = test, type = "response")
+  diags2 <- rbind(diags2, class_diag(probs4, truth))
+}
+diags2 %>% summarize_all(mean)
+```
+*I ran another logistic regression but this time I included the same binary repsonse variable in addition to the rest of the explanatory variables. When running the cross validation test, however, I removed one of the explanatory variables because it was another binary variable in my dataset. I was running into several errors when trying to include it in the cross validation, which is why that one variable was taken out. After running the initial logistic regression with all of these new variables, the accuracy was calculated to be 0.941, the sensitivity was 0.667, specificity was 0.978, the ppv was 0.8, and finally the AUC value was computed as 0.985. This value for the area under the curve calculation falls within the range of being labeled as 'great'!This excellent AUC value suggests that this model has predictions that are fairly close to being 100% correct. Next,I ran a 10- k fold CV on the dataset. Cross validation is particularly useful when trying to determine how well a model is performing. For both cross validation tests that I ran, I had to set my k value equal to 3 since my dataset only contained 51 observations. This small size had to be taken into consideration specifically when running these tests to ensure that the training dataset was functioning as is expected so that the model could generate more accurate results. After doing this, the computed value for accuracy was 0.804, sensitivity was 0.167, specificity was 0.893, and ppv was not applicable as it did not generate a result. The resulting AUC value was 0.808. Since the AUC value represents how well the dataset is doing in prediciting overall, this depicts a 'good' value.This computed value of 0.808 was indeed smaller than that of the in-sample test which generated an AUC value of 0.985. This k-fold cv test performed worse out of sample, likely due to overfitting. Next, I ran a LASSO on the same model from above. It is important to note that were no significant findings among the variables included in this logistic regression. After performing the lasso regularization, the only coefficient estimates that returned non-zero values other than the intercept was "time"-it had a coefficient estimate of 0.589. Therefore, when conducting the next 10-fold CV test, only the explanatory variable "time"" was included. This cross validation generated an AUC value of 0.919. Although this is a great measure for suggesting how accurate the predictions of a model are, this AUC value was still less than the value of 0.985 which was computed by the first logistic regression.*
+
+
+
+
+
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

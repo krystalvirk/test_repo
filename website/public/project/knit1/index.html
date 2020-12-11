@@ -1,0 +1,2242 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Krystal Virk" />
+    
+    <link rel="shortcut icon" type="image/x-icon" href="../../img/favicon.ico">
+    <title>Billboard Music Trends Across the Decades</title>
+    <meta name="generator" content="Hugo 0.79.0" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="../../"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="../../post/">BLOG</a></li>
+        
+        <li><a href="../../projects/">PROJECTS</a></li>
+        
+        <li><a href="../../resume/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="../../project/knit1/">Billboard Music Trends Across the Decades</a></strong>
+          </h3>
+        </div>
+ 
+<div class="blog-title">
+          <h4>
+         January 1, 0001 
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+<script src="../../rmarkdown-libs/kePrint/kePrint.js"></script>
+<link href="../../rmarkdown-libs/lightable/lightable.css" rel="stylesheet" />
+
+
+<div id="krystal-virk" class="section level1">
+<h1>Krystal Virk</h1>
+<div id="introduction-4-points" class="section level3">
+<h3>Introduction (4 points)</h3>
+<p><em>For my final project in biostatistics, I collected data from people's spotify history to see if there was any relationship between how introverted or extroverted someone was in relation to how much time they spent listening to music. Music has always been such a constant force in my life, especially during this time of uncertainity due to the pandemic. I grew up listeining to groovy songs from Fleetwood Mac, Lionel Richie, and Celine Dion to name a few of my musical influences thanks to my parents! After being assigned this project I knew I wanted to continue with this music theme and analyze data from billboard charts over the years. Both of the datasets I used were found online because I was really interested in analyzing data over the span of a few decades and the billboard dataset preloaded in r did not fit my desired criteria. The first dataset I included was the spotify track data dataset that I found which contains information from the top charts from the past decades. This dataset includes several descriptive variables such as the artist, song title, and the year the song was charted, in addition to specific characteristiscs of the songs such as danceability, energy, and tempo. The second dataset that I used for my project was the wiki hot 100s dataset which included data from the Billboard Hot 100 charts from 1960-2016! This dataset ony included four variables: the artist, title of the song, year it was charted, and its rank on the billboard charts. I had the idea to join these two datasets to first determine how many songs were similar between the two datasets. After identifying and narrowing down the similar songs across both billboard charts, I was interested in seeing if there was any discrepancy in danceability across the decades. I set out to find whether danceabiity differed in the popular music across the decades!I was also intrigued to see if any artists charted the Billboard Hot 100s for longer than one decade, and on the opposite end of this spectrum, I was curious to see if any artists were simply One-hit wonders during their time. Music has evolved so much over the years and I know I am constantly hearing from my parents how the music that is played on the pop radio today does not compare to the music made by the creative geniuses of their childhood. I had so much fun being able to apply the concepts we have been learning in class to analyze some truly groovy music data (this was the inspiration for my newly named dataset!)</em></p>
+<pre class="r"><code>install.packages(&quot;billboard&quot;, repos = &quot;http://cran.us.r-project.org&quot;)</code></pre>
+<pre><code>## Installing package into &#39;/stor/home/kv6653/R/x86_64-pc-linux-gnu-library/3.6&#39;
+## (as &#39;lib&#39; is unspecified)</code></pre>
+<pre class="r"><code>library(billboard)
+songs_data &lt;- spotify_track_data
+library(tidyverse)</code></pre>
+<pre><code>## ── Attaching packages ───────────── tidyverse 1.3.0 ──</code></pre>
+<pre><code>## ✓ ggplot2 3.3.2     ✓ purrr   0.3.4
+## ✓ tibble  3.0.3     ✓ dplyr   1.0.1
+## ✓ tidyr   1.1.1     ✓ stringr 1.4.0
+## ✓ readr   1.3.1     ✓ forcats 0.5.0</code></pre>
+<pre><code>## ── Conflicts ──────────────── tidyverse_conflicts() ──
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>billboard_raw &lt;- as_tibble(wiki_hot_100s)
+library(dplyr)
+view(songs_data)
+view(billboard_raw)</code></pre>
+<div id="tidying-rearranging-widelong-8-pts" class="section level4">
+<h4>1. Tidying: Rearranging Wide/Long (8 pts)</h4>
+<pre class="r"><code>install.packages(&quot;billboard&quot;, repos = &quot;http://cran.us.r-project.org&quot;)</code></pre>
+<pre><code>## Installing package into &#39;/stor/home/kv6653/R/x86_64-pc-linux-gnu-library/3.6&#39;
+## (as &#39;lib&#39; is unspecified)</code></pre>
+<pre class="r"><code>library(billboard)
+songs_data &lt;- spotify_track_data
+library(tidyverse)
+billboard_raw &lt;- as_tibble(wiki_hot_100s)
+library(dplyr)
+view(songs_data)
+view(billboard_raw)</code></pre>
+<p><em>My dataset was already tidy, therefore I included the pivot(longer) and pivot(wider) functions later in my data analysis.</em></p>
+</div>
+<div id="joiningmerging-8-pts" class="section level4">
+<h4>2. Joining/Merging (8 pts)</h4>
+<pre class="r"><code>head(songs_data)</code></pre>
+<pre><code>## # A tibble: 6 x 23
+##   year  artist_name artist_id explicit track_name track_id danceability energy
+##   &lt;chr&gt; &lt;chr&gt;       &lt;chr&gt;     &lt;lgl&gt;    &lt;chr&gt;      &lt;chr&gt;           &lt;dbl&gt;  &lt;dbl&gt;
+## 1 1960  Percy Fait… 24DQLSng… FALSE    &quot;The Them… 2kKL5kk…        0.466  0.389
+## 2 1960  Jim Reeves  2Ev0e8GU… FALSE    &quot;He&#39;ll Ha… 7DH5dXV…        0.554  0.186
+## 3 1960  Johnny Pre… 1B8n8vtE… FALSE    &quot;Running … 60DbxCJ…        0.758  0.462
+## 4 1960  Mark Dinni… 55Rf9Kfq… FALSE    &quot;Teen Ang… 7GvhZ0F…        0.583  0.168
+## 5 1960  Brenda Lee  4cPHsZM9… FALSE    &quot;I&#39;m Sorr… 5VyBNCS…        0.567  0.141
+## 6 1960  Elvis Pres… 43ZHCT0c… FALSE    &quot;It&#39;s Now… 2u8Lrq2…        0.635  0.391
+## # … with 15 more variables: key &lt;int&gt;, loudness &lt;dbl&gt;, mode &lt;int&gt;,
+## #   speechiness &lt;dbl&gt;, acousticness &lt;dbl&gt;, instrumentalness &lt;dbl&gt;,
+## #   liveness &lt;dbl&gt;, valence &lt;dbl&gt;, tempo &lt;dbl&gt;, type &lt;chr&gt;, uri &lt;chr&gt;,
+## #   track_href &lt;chr&gt;, analysis_url &lt;chr&gt;, duration_ms &lt;int&gt;,
+## #   time_signature &lt;int&gt;</code></pre>
+<pre class="r"><code>head(billboard_raw)</code></pre>
+<pre><code>## # A tibble: 6 x 4
+##   no    title                     artist              year 
+##   &lt;chr&gt; &lt;chr&gt;                     &lt;chr&gt;               &lt;chr&gt;
+## 1 1     Theme from A Summer Place Percy Faith         1960 
+## 2 2     He&#39;ll Have to Go          Jim Reeves          1960 
+## 3 3     Cathy&#39;s Clown             The Everly Brothers 1960 
+## 4 4     Running Bear              Johnny Preston      1960 
+## 5 5     Teen Angel                Mark Dinning        1960 
+## 6 6     I&#39;m Sorry                 Brenda Lee          1960</code></pre>
+<pre class="r"><code>names(billboard_raw)[2] &lt;- &quot;track_name&quot;
+names(billboard_raw)[3] &lt;- &quot;artist_name&quot;
+groovyjamz&lt;-songs_data %&gt;% inner_join(billboard_raw, by=c(&quot;track_name&quot;,&quot;artist_name&quot;))
+view(groovyjamz)</code></pre>
+<p><em>I joined my two datasets using the inner join type function. I used the inner join rather than the left, right, or semi-join type function because the inner join works to merge two datsets based on commonalities between columns. For my data analysis, I created a new dataset that only included the list of songs from the Billboard Hot 100 charts that were similar across both datatsets. Using the innerjoin, I was able to combine the two datasets using the columns for the artist of the song, as well as the name of the song. The inner join is able to recognize that my data was to be combined using those specific columns in the dataset, and it only joined the rows of data that matched across both sets of data. Therefore, an inner join was ideal to use for this data analysis. The cases that were dropped following this join were those songs that did not appear in both of the datasets. The billboard dataset initially contained 5,701 obersvations and 4 variables whereas the songs dataset had 5,497 observations and 23 variables. After merging the datasets, only 2,781 observations and 25 variables remained.The reason for this is because one of the datasets I used was scraped so that there was a randomly generated amount of songs from billboard charts included, hence the reason for this variation across two datasets for the Billboard charts. I initially only joined my datasets using the similar column of track name because I assumed that the best way to ensure only the same charting songs across both sets of data was to use the specific song title, rather than the name of the artist as many artists are on the charts for mutiple songs. I quickly realized that I could not only join using song title because there was overlap between artists who had songs on the top charts with the same name. After seeing Elvis Presley and Lionel Richie's &quot;Stuck on You&quot; combined I quickly realized I needed to update my join! This was just a fun realization I made that made me appreciate the difficulty and satisfaction of applying these concepts we have learned in class to real life data!</em></p>
+</div>
+<div id="wrangling-40-pts" class="section level4">
+<h4>3. Wrangling (40 pts)</h4>
+<pre class="r"><code>r = getOption(&quot;repos&quot;)
+r[&quot;CRAN&quot;] = &quot;http://cran.us.r-project.org&quot;
+options(repos = r)
+
+groovyjamz%&gt;%summarize_all(n_distinct)</code></pre>
+<pre><code>## # A tibble: 1 x 25
+##   year.x artist_name artist_id explicit track_name track_id danceability energy
+##    &lt;int&gt;       &lt;int&gt;     &lt;int&gt;    &lt;int&gt;      &lt;int&gt;    &lt;int&gt;        &lt;int&gt;  &lt;int&gt;
+## 1     56        1261      1262        2       2347     2511          626    742
+## # … with 17 more variables: key &lt;int&gt;, loudness &lt;int&gt;, mode &lt;int&gt;,
+## #   speechiness &lt;int&gt;, acousticness &lt;int&gt;, instrumentalness &lt;int&gt;,
+## #   liveness &lt;int&gt;, valence &lt;int&gt;, tempo &lt;int&gt;, type &lt;int&gt;, uri &lt;int&gt;,
+## #   track_href &lt;int&gt;, analysis_url &lt;int&gt;, duration_ms &lt;int&gt;,
+## #   time_signature &lt;int&gt;, no &lt;int&gt;, year.y &lt;int&gt;</code></pre>
+<pre class="r"><code>groovyjamz %&gt;% filter(complete.cases(groovyjamz))</code></pre>
+<pre><code>## # A tibble: 2,781 x 25
+##    year.x artist_name artist_id explicit track_name track_id danceability energy
+##    &lt;chr&gt;  &lt;chr&gt;       &lt;chr&gt;     &lt;lgl&gt;    &lt;chr&gt;      &lt;chr&gt;           &lt;dbl&gt;  &lt;dbl&gt;
+##  1 1960   Jim Reeves  2Ev0e8GU… FALSE    He&#39;ll Hav… 7DH5dXV…        0.554  0.186
+##  2 1960   Johnny Pre… 1B8n8vtE… FALSE    Running B… 60DbxCJ…        0.758  0.462
+##  3 1960   Mark Dinni… 55Rf9Kfq… FALSE    Teen Angel 7GvhZ0F…        0.583  0.168
+##  4 1960   Jimmy Jones 7ydcRbgt… FALSE    Handy Man  0X6Nnkf…        0.534  0.72 
+##  5 1960   Elvis Pres… 43ZHCT0c… FALSE    Stuck on … 6RLOZGY…        0.664  0.539
+##  6 1960   Connie Fra… 3EY5DxGd… FALSE    Everybody… 6jdONXt…        0.587  0.72 
+##  7 1960   The Brothe… 0nd3tsqH… FALSE    Greenfiel… 7F3R0rK…        0.485  0.182
+##  8 1960   Marty Robb… 0Xi59sEw… FALSE    El Paso    4f8hBeM…        0.654  0.452
+##  9 1960   Connie Ste… 5dg9jB2s… FALSE    Sixteen R… 0oI0ekr…        0.339  0.406
+## 10 1960   Paul Anka   7ceUfdWq… FALSE    Puppy Love 1wkIJld…        0.346  0.348
+## # … with 2,771 more rows, and 17 more variables: key &lt;int&gt;, loudness &lt;dbl&gt;,
+## #   mode &lt;int&gt;, speechiness &lt;dbl&gt;, acousticness &lt;dbl&gt;, instrumentalness &lt;dbl&gt;,
+## #   liveness &lt;dbl&gt;, valence &lt;dbl&gt;, tempo &lt;dbl&gt;, type &lt;chr&gt;, uri &lt;chr&gt;,
+## #   track_href &lt;chr&gt;, analysis_url &lt;chr&gt;, duration_ms &lt;int&gt;,
+## #   time_signature &lt;int&gt;, no &lt;chr&gt;, year.y &lt;chr&gt;</code></pre>
+<pre class="r"><code>colnames(groovyjamz)[1]  &lt;- &quot;decade&quot;
+groovyjamz_new&lt;-mutate(groovyjamz, decade = case_when(decade&lt;1970 ~&quot;1960s&quot;, decade&lt;1980~&quot;1970s&quot;, decade&lt;1990~&quot;1980s&quot;, decade&lt;2000~&quot;1990s&quot;, decade&lt;2010~&quot;2000s&quot;, decade&gt;=2010~&quot;2010s&quot;))
+groovyjamz_new%&gt;%group_by(decade)%&gt;%summarize_if(is.numeric,c(mean=mean,sd=sd),na.rm=T) </code></pre>
+<pre><code>## # A tibble: 6 x 27
+##   decade danceability_me… energy_mean key_mean loudness_mean mode_mean
+##   &lt;chr&gt;             &lt;dbl&gt;       &lt;dbl&gt;    &lt;dbl&gt;         &lt;dbl&gt;     &lt;dbl&gt;
+## 1 1960s             0.555       0.524     5.00        -10.3      0.830
+## 2 1970s             0.587       0.556     5.03        -10.7      0.776
+## 3 1980s             0.633       0.638     5.29         -9.57     0.696
+## 4 1990s             0.657       0.626     5.58         -8.68     0.623
+## 5 2000s             0.636       0.696     5.26         -5.73     0.621
+## 6 2010s             0.624       0.711     5.28         -5.47     0.666
+## # … with 21 more variables: speechiness_mean &lt;dbl&gt;, acousticness_mean &lt;dbl&gt;,
+## #   instrumentalness_mean &lt;dbl&gt;, liveness_mean &lt;dbl&gt;, valence_mean &lt;dbl&gt;,
+## #   tempo_mean &lt;dbl&gt;, duration_ms_mean &lt;dbl&gt;, time_signature_mean &lt;dbl&gt;,
+## #   danceability_sd &lt;dbl&gt;, energy_sd &lt;dbl&gt;, key_sd &lt;dbl&gt;, loudness_sd &lt;dbl&gt;,
+## #   mode_sd &lt;dbl&gt;, speechiness_sd &lt;dbl&gt;, acousticness_sd &lt;dbl&gt;,
+## #   instrumentalness_sd &lt;dbl&gt;, liveness_sd &lt;dbl&gt;, valence_sd &lt;dbl&gt;,
+## #   tempo_sd &lt;dbl&gt;, duration_ms_sd &lt;dbl&gt;, time_signature_sd &lt;dbl&gt;</code></pre>
+<pre class="r"><code>groovyjamz_new%&gt;% add_count(artist_name)</code></pre>
+<pre><code>## # A tibble: 2,781 x 26
+##    decade artist_name artist_id explicit track_name track_id danceability energy
+##    &lt;chr&gt;  &lt;chr&gt;       &lt;chr&gt;     &lt;lgl&gt;    &lt;chr&gt;      &lt;chr&gt;           &lt;dbl&gt;  &lt;dbl&gt;
+##  1 1960s  Jim Reeves  2Ev0e8GU… FALSE    He&#39;ll Hav… 7DH5dXV…        0.554  0.186
+##  2 1960s  Johnny Pre… 1B8n8vtE… FALSE    Running B… 60DbxCJ…        0.758  0.462
+##  3 1960s  Mark Dinni… 55Rf9Kfq… FALSE    Teen Angel 7GvhZ0F…        0.583  0.168
+##  4 1960s  Jimmy Jones 7ydcRbgt… FALSE    Handy Man  0X6Nnkf…        0.534  0.72 
+##  5 1960s  Elvis Pres… 43ZHCT0c… FALSE    Stuck on … 6RLOZGY…        0.664  0.539
+##  6 1960s  Connie Fra… 3EY5DxGd… FALSE    Everybody… 6jdONXt…        0.587  0.72 
+##  7 1960s  The Brothe… 0nd3tsqH… FALSE    Greenfiel… 7F3R0rK…        0.485  0.182
+##  8 1960s  Marty Robb… 0Xi59sEw… FALSE    El Paso    4f8hBeM…        0.654  0.452
+##  9 1960s  Connie Ste… 5dg9jB2s… FALSE    Sixteen R… 0oI0ekr…        0.339  0.406
+## 10 1960s  Paul Anka   7ceUfdWq… FALSE    Puppy Love 1wkIJld…        0.346  0.348
+## # … with 2,771 more rows, and 18 more variables: key &lt;int&gt;, loudness &lt;dbl&gt;,
+## #   mode &lt;int&gt;, speechiness &lt;dbl&gt;, acousticness &lt;dbl&gt;, instrumentalness &lt;dbl&gt;,
+## #   liveness &lt;dbl&gt;, valence &lt;dbl&gt;, tempo &lt;dbl&gt;, type &lt;chr&gt;, uri &lt;chr&gt;,
+## #   track_href &lt;chr&gt;, analysis_url &lt;chr&gt;, duration_ms &lt;int&gt;,
+## #   time_signature &lt;int&gt;, no &lt;chr&gt;, year.y &lt;chr&gt;, n &lt;int&gt;</code></pre>
+<pre class="r"><code>groovyjamz_new %&gt;% add_count(artist_name) %&gt;% filter(no &lt;= 10) %&gt;%arrange(desc(year.y))%&gt;%select(decade,no,everything()) </code></pre>
+<pre><code>## # A tibble: 46 x 26
+##    decade no    artist_name artist_id explicit track_name track_id danceability
+##    &lt;chr&gt;  &lt;chr&gt; &lt;chr&gt;       &lt;chr&gt;     &lt;lgl&gt;    &lt;chr&gt;      &lt;chr&gt;           &lt;dbl&gt;
+##  1 2010s  10    Katy Perry  6jJ0s89e… FALSE    Roar       3XSczvk…        0.667
+##  2 2010s  10    Katy Perry  6jJ0s89e… FALSE    Roar       3bDGwl0…        0.56 
+##  3 2010s  10    One Direct… 4AK6F7OL… FALSE    What Make… 3SPDQfj…        0.729
+##  4 2010s  1     Adele       4dpARuHx… FALSE    Rolling i… 1CkvWZm…        0.729
+##  5 2010s  1     Adele       4dpARuHx… FALSE    Rolling i… 1CkvWZm…        0.729
+##  6 2000s  1     The Black … 1yxSLGMD… FALSE    Boom Boom… 7xRNsqO…        0.869
+##  7 2000s  10    The All-Am… 3vAaWhdB… FALSE    Gives You… 6ihL9Tj…        0.714
+##  8 2000s  10    Chris Brown 7bXgB6jM… FALSE    Forever    7tAXHZd…        0.672
+##  9 2000s  1     Beyoncé     6vWDO969… FALSE    Irreplace… 1G7DcLz…        0.576
+## 10 2000s  1     Daniel Pow… 7xTcuBOI… FALSE    Bad Day    0mUyMaw…        0.599
+## # … with 36 more rows, and 18 more variables: energy &lt;dbl&gt;, key &lt;int&gt;,
+## #   loudness &lt;dbl&gt;, mode &lt;int&gt;, speechiness &lt;dbl&gt;, acousticness &lt;dbl&gt;,
+## #   instrumentalness &lt;dbl&gt;, liveness &lt;dbl&gt;, valence &lt;dbl&gt;, tempo &lt;dbl&gt;,
+## #   type &lt;chr&gt;, uri &lt;chr&gt;, track_href &lt;chr&gt;, analysis_url &lt;chr&gt;,
+## #   duration_ms &lt;int&gt;, time_signature &lt;int&gt;, year.y &lt;chr&gt;, n &lt;int&gt;</code></pre>
+<pre class="r"><code>groovyjamz_new %&gt;% add_count(artist_name) %&gt;% filter(no == 1, n== 1) </code></pre>
+<pre><code>## # A tibble: 2 x 26
+##   decade artist_name artist_id explicit track_name track_id danceability energy
+##   &lt;chr&gt;  &lt;chr&gt;       &lt;chr&gt;     &lt;lgl&gt;    &lt;chr&gt;      &lt;chr&gt;           &lt;dbl&gt;  &lt;dbl&gt;
+## 1 1980s  The Police  5NGO30tJ… FALSE    Every Bre… 2PnNomk…        0.828  0.447
+## 2 2000s  Daniel Pow… 7xTcuBOI… FALSE    Bad Day    0mUyMaw…        0.599  0.785
+## # … with 18 more variables: key &lt;int&gt;, loudness &lt;dbl&gt;, mode &lt;int&gt;,
+## #   speechiness &lt;dbl&gt;, acousticness &lt;dbl&gt;, instrumentalness &lt;dbl&gt;,
+## #   liveness &lt;dbl&gt;, valence &lt;dbl&gt;, tempo &lt;dbl&gt;, type &lt;chr&gt;, uri &lt;chr&gt;,
+## #   track_href &lt;chr&gt;, analysis_url &lt;chr&gt;, duration_ms &lt;int&gt;,
+## #   time_signature &lt;int&gt;, no &lt;chr&gt;, year.y &lt;chr&gt;, n &lt;int&gt;</code></pre>
+<pre class="r"><code>groovyjamz_new %&gt;% filter(no == 1) %&gt;% add_count(artist_name)%&gt;%filter(n&gt;1) </code></pre>
+<pre><code>## # A tibble: 2 x 26
+##   decade artist_name artist_id explicit track_name track_id danceability energy
+##   &lt;chr&gt;  &lt;chr&gt;       &lt;chr&gt;     &lt;lgl&gt;    &lt;chr&gt;      &lt;chr&gt;           &lt;dbl&gt;  &lt;dbl&gt;
+## 1 2010s  Adele       4dpARuHx… FALSE    Rolling i… 1CkvWZm…        0.729  0.756
+## 2 2010s  Adele       4dpARuHx… FALSE    Rolling i… 1CkvWZm…        0.729  0.756
+## # … with 18 more variables: key &lt;int&gt;, loudness &lt;dbl&gt;, mode &lt;int&gt;,
+## #   speechiness &lt;dbl&gt;, acousticness &lt;dbl&gt;, instrumentalness &lt;dbl&gt;,
+## #   liveness &lt;dbl&gt;, valence &lt;dbl&gt;, tempo &lt;dbl&gt;, type &lt;chr&gt;, uri &lt;chr&gt;,
+## #   track_href &lt;chr&gt;, analysis_url &lt;chr&gt;, duration_ms &lt;int&gt;,
+## #   time_signature &lt;int&gt;, no &lt;chr&gt;, year.y &lt;chr&gt;, n &lt;int&gt;</code></pre>
+<pre class="r"><code>groovyjamz_new%&gt;%filter(artist_name== &quot;Fleetwood Mac&quot;)%&gt;%select(no, everything())</code></pre>
+<pre><code>## # A tibble: 7 x 25
+##   no    decade artist_name artist_id explicit track_name track_id danceability
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;       &lt;chr&gt;     &lt;lgl&gt;    &lt;chr&gt;      &lt;chr&gt;           &lt;dbl&gt;
+## 1 77    1970s  Fleetwood … 08GQAI4e… FALSE    Rhiannon   5TWPfke…        0.722
+## 2 53    1970s  Fleetwood … 08GQAI4e… FALSE    Say You L… 2kOOxUI…        0.723
+## 3 94    1970s  Fleetwood … 08GQAI4e… FALSE    Go Your O… 0FeCO85…        0.597
+## 4 52    1970s  Fleetwood … 08GQAI4e… FALSE    Don&#39;t Stop 4SXU3lU…        0.686
+## 5 39    1970s  Fleetwood … 08GQAI4e… FALSE    Dreams     703BT1N…        0.823
+## 6 94    1980s  Fleetwood … 08GQAI4e… FALSE    Tusk       56vXknI…        0.614
+## 7 31    1980s  Fleetwood … 08GQAI4e… FALSE    Hold Me    4kRMsLX…        0.709
+## # … with 17 more variables: energy &lt;dbl&gt;, key &lt;int&gt;, loudness &lt;dbl&gt;,
+## #   mode &lt;int&gt;, speechiness &lt;dbl&gt;, acousticness &lt;dbl&gt;, instrumentalness &lt;dbl&gt;,
+## #   liveness &lt;dbl&gt;, valence &lt;dbl&gt;, tempo &lt;dbl&gt;, type &lt;chr&gt;, uri &lt;chr&gt;,
+## #   track_href &lt;chr&gt;, analysis_url &lt;chr&gt;, duration_ms &lt;int&gt;,
+## #   time_signature &lt;int&gt;, year.y &lt;chr&gt;</code></pre>
+<pre class="r"><code>groovyjamz_new%&gt;%filter(artist_name== &quot;Taylor Swift&quot;)%&gt;%select(no, everything())</code></pre>
+<pre><code>## # A tibble: 14 x 25
+##    no    decade artist_name artist_id explicit track_name track_id danceability
+##    &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;       &lt;chr&gt;     &lt;lgl&gt;    &lt;chr&gt;      &lt;chr&gt;           &lt;dbl&gt;
+##  1 81    2000s  Taylor Swi… 06HL4z0C… FALSE    Love Story 0kN3oXY…        0.611
+##  2 5     2000s  Taylor Swi… 06HL4z0C… FALSE    Love Story 0kN3oXY…        0.611
+##  3 76    2000s  Taylor Swi… 06HL4z0C… FALSE    White Hor… 4jPtq9s…        0.355
+##  4 46    2010s  Taylor Swi… 06HL4z0C… FALSE    Mine       0dBW6Zs…        0.619
+##  5 33    2010s  Taylor Swi… 06HL4z0C… FALSE    We Are Ne… 0QGFCtX…        0.533
+##  6 13    2010s  Taylor Swi… 06HL4z0C… FALSE    Shake It … 30nn05U…        0.507
+##  7 18    2010s  Taylor Swi… 06HL4z0C… FALSE    Shake It … 30nn05U…        0.507
+##  8 7     2010s  Taylor Swi… 06HL4z0C… FALSE    Blank Spa… 2sC2P3B…        0.753
+##  9 7     2010s  Taylor Swi… 06HL4z0C… FALSE    Blank Spa… 3ulIErp…        0.76 
+## 10 13    2010s  Taylor Swi… 06HL4z0C… FALSE    Shake It … 34ONrmv…        0.647
+## 11 18    2010s  Taylor Swi… 06HL4z0C… FALSE    Shake It … 34ONrmv…        0.647
+## 12 57    2010s  Taylor Swi… 06HL4z0C… FALSE    Wildest D… 4NphdFx…        0.55 
+## 13 79    2010s  Taylor Swi… 06HL4z0C… FALSE    Wildest D… 4NphdFx…        0.55 
+## 14 29    2010s  Taylor Swi… 06HL4z0C… FALSE    Style      4AVUqcP…        0.588
+## # … with 17 more variables: energy &lt;dbl&gt;, key &lt;int&gt;, loudness &lt;dbl&gt;,
+## #   mode &lt;int&gt;, speechiness &lt;dbl&gt;, acousticness &lt;dbl&gt;, instrumentalness &lt;dbl&gt;,
+## #   liveness &lt;dbl&gt;, valence &lt;dbl&gt;, tempo &lt;dbl&gt;, type &lt;chr&gt;, uri &lt;chr&gt;,
+## #   track_href &lt;chr&gt;, analysis_url &lt;chr&gt;, duration_ms &lt;int&gt;,
+## #   time_signature &lt;int&gt;, year.y &lt;chr&gt;</code></pre>
+<pre class="r"><code>summary(groovyjamz_new)</code></pre>
+<pre><code>##     decade          artist_name         artist_id          explicit      
+##  Length:2781        Length:2781        Length:2781        Mode :logical  
+##  Class :character   Class :character   Class :character   FALSE:2652     
+##  Mode  :character   Mode  :character   Mode  :character   TRUE :129      
+##                                                                          
+##                                                                          
+##                                                                          
+##   track_name          track_id          danceability        energy      
+##  Length:2781        Length:2781        Min.   :0.1330   Min.   :0.0264  
+##  Class :character   Class :character   1st Qu.:0.5250   1st Qu.:0.4860  
+##  Mode  :character   Mode  :character   Median :0.6330   Median :0.6410  
+##                                        Mean   :0.6187   Mean   :0.6248  
+##                                        3rd Qu.:0.7220   3rd Qu.:0.7770  
+##                                        Max.   :0.9800   Max.   :0.9930  
+##       key           loudness            mode         speechiness     
+##  Min.   : 0.00   Min.   :-33.987   Min.   :0.0000   Min.   :0.02150  
+##  1st Qu.: 2.00   1st Qu.:-10.674   1st Qu.:0.0000   1st Qu.:0.03140  
+##  Median : 5.00   Median : -7.830   Median :1.0000   Median :0.03960  
+##  Mean   : 5.26   Mean   : -8.460   Mean   :0.6951   Mean   :0.05981  
+##  3rd Qu.: 8.00   3rd Qu.: -5.710   3rd Qu.:1.0000   3rd Qu.:0.05890  
+##  Max.   :11.00   Max.   : -1.097   Max.   :1.0000   Max.   :0.61300  
+##   acousticness       instrumentalness       liveness         valence      
+##  Min.   :0.0000286   Min.   :0.0000000   Min.   :0.0189   Min.   :0.0361  
+##  1st Qu.:0.0444000   1st Qu.:0.0000000   1st Qu.:0.0866   1st Qu.:0.4030  
+##  Median :0.1610000   Median :0.0000053   Median :0.1220   Median :0.6360  
+##  Mean   :0.2614501   Mean   :0.0261131   Mean   :0.1759   Mean   :0.6051  
+##  3rd Qu.:0.4320000   3rd Qu.:0.0003620   3rd Qu.:0.2170   3rd Qu.:0.8040  
+##  Max.   :0.9860000   Max.   :0.9840000   Max.   :0.9900   Max.   :0.9850  
+##      tempo            type               uri             track_href       
+##  Min.   : 51.32   Length:2781        Length:2781        Length:2781       
+##  1st Qu.:100.00   Class :character   Class :character   Class :character  
+##  Median :119.28   Mode  :character   Mode  :character   Mode  :character  
+##  Mean   :120.18                                                           
+##  3rd Qu.:135.11                                                           
+##  Max.   :206.52                                                           
+##  analysis_url        duration_ms     time_signature       no           
+##  Length:2781        Min.   : 91373   Min.   :1.000   Length:2781       
+##  Class :character   1st Qu.:198707   1st Qu.:4.000   Class :character  
+##  Mode  :character   Median :232000   Median :4.000   Mode  :character  
+##                     Mean   :234073   Mean   :3.958                     
+##                     3rd Qu.:264504   3rd Qu.:4.000                     
+##                     Max.   :817733   Max.   :5.000                     
+##     year.y         
+##  Length:2781       
+##  Class :character  
+##  Mode  :character  
+##                    
+##                    
+## </code></pre>
+<pre class="r"><code>groovyjamz_long&lt;-groovyjamz_new%&gt;% summarize_if(is.numeric, list(min=min,max=max,mean=mean,sd=sd,median=median),na.rm=T)%&gt;%pivot_longer(danceability_min:time_signature_median)
+groovyjamz_long%&gt;% pivot_wider(names_from=name, values_from=value) </code></pre>
+<pre><code>## # A tibble: 1 x 65
+##   danceability_min energy_min key_min loudness_min mode_min speechiness_min
+##              &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt;        &lt;dbl&gt;    &lt;dbl&gt;           &lt;dbl&gt;
+## 1            0.133     0.0264       0        -34.0        0          0.0215
+## # … with 59 more variables: acousticness_min &lt;dbl&gt;, instrumentalness_min &lt;dbl&gt;,
+## #   liveness_min &lt;dbl&gt;, valence_min &lt;dbl&gt;, tempo_min &lt;dbl&gt;,
+## #   duration_ms_min &lt;dbl&gt;, time_signature_min &lt;dbl&gt;, danceability_max &lt;dbl&gt;,
+## #   energy_max &lt;dbl&gt;, key_max &lt;dbl&gt;, loudness_max &lt;dbl&gt;, mode_max &lt;dbl&gt;,
+## #   speechiness_max &lt;dbl&gt;, acousticness_max &lt;dbl&gt;, instrumentalness_max &lt;dbl&gt;,
+## #   liveness_max &lt;dbl&gt;, valence_max &lt;dbl&gt;, tempo_max &lt;dbl&gt;,
+## #   duration_ms_max &lt;dbl&gt;, time_signature_max &lt;dbl&gt;, danceability_mean &lt;dbl&gt;,
+## #   energy_mean &lt;dbl&gt;, key_mean &lt;dbl&gt;, loudness_mean &lt;dbl&gt;, mode_mean &lt;dbl&gt;,
+## #   speechiness_mean &lt;dbl&gt;, acousticness_mean &lt;dbl&gt;,
+## #   instrumentalness_mean &lt;dbl&gt;, liveness_mean &lt;dbl&gt;, valence_mean &lt;dbl&gt;,
+## #   tempo_mean &lt;dbl&gt;, duration_ms_mean &lt;dbl&gt;, time_signature_mean &lt;dbl&gt;,
+## #   danceability_sd &lt;dbl&gt;, energy_sd &lt;dbl&gt;, key_sd &lt;dbl&gt;, loudness_sd &lt;dbl&gt;,
+## #   mode_sd &lt;dbl&gt;, speechiness_sd &lt;dbl&gt;, acousticness_sd &lt;dbl&gt;,
+## #   instrumentalness_sd &lt;dbl&gt;, liveness_sd &lt;dbl&gt;, valence_sd &lt;dbl&gt;,
+## #   tempo_sd &lt;dbl&gt;, duration_ms_sd &lt;dbl&gt;, time_signature_sd &lt;dbl&gt;,
+## #   danceability_median &lt;dbl&gt;, energy_median &lt;dbl&gt;, key_median &lt;dbl&gt;,
+## #   loudness_median &lt;dbl&gt;, mode_median &lt;dbl&gt;, speechiness_median &lt;dbl&gt;,
+## #   acousticness_median &lt;dbl&gt;, instrumentalness_median &lt;dbl&gt;,
+## #   liveness_median &lt;dbl&gt;, valence_median &lt;dbl&gt;, tempo_median &lt;dbl&gt;,
+## #   duration_ms_median &lt;dbl&gt;, time_signature_median &lt;dbl&gt;</code></pre>
+<pre class="r"><code>groovynum&lt;-groovyjamz_new%&gt;% select(decade,artist_name,danceability, energy, valence, tempo, loudness)                                                                                
+Sum_Groovy&lt;-groovynum%&gt;%group_by(decade)%&gt;%summarize_if(is.numeric,list(min=min,max=max,mean=mean,sd=sd,median=median),na.rm=T)
+install.packages(&quot;kableExtra&quot;)</code></pre>
+<pre><code>## Installing package into &#39;/stor/home/kv6653/R/x86_64-pc-linux-gnu-library/3.6&#39;
+## (as &#39;lib&#39; is unspecified)</code></pre>
+<pre class="r"><code>library(kableExtra)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;kableExtra&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:dplyr&#39;:
+## 
+##     group_rows</code></pre>
+<pre class="r"><code>kbl(Sum_Groovy)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+decade
+</th>
+<th style="text-align:right;">
+danceability_min
+</th>
+<th style="text-align:right;">
+energy_min
+</th>
+<th style="text-align:right;">
+valence_min
+</th>
+<th style="text-align:right;">
+tempo_min
+</th>
+<th style="text-align:right;">
+loudness_min
+</th>
+<th style="text-align:right;">
+danceability_max
+</th>
+<th style="text-align:right;">
+energy_max
+</th>
+<th style="text-align:right;">
+valence_max
+</th>
+<th style="text-align:right;">
+tempo_max
+</th>
+<th style="text-align:right;">
+loudness_max
+</th>
+<th style="text-align:right;">
+danceability_mean
+</th>
+<th style="text-align:right;">
+energy_mean
+</th>
+<th style="text-align:right;">
+valence_mean
+</th>
+<th style="text-align:right;">
+tempo_mean
+</th>
+<th style="text-align:right;">
+loudness_mean
+</th>
+<th style="text-align:right;">
+danceability_sd
+</th>
+<th style="text-align:right;">
+energy_sd
+</th>
+<th style="text-align:right;">
+valence_sd
+</th>
+<th style="text-align:right;">
+tempo_sd
+</th>
+<th style="text-align:right;">
+loudness_sd
+</th>
+<th style="text-align:right;">
+danceability_median
+</th>
+<th style="text-align:right;">
+energy_median
+</th>
+<th style="text-align:right;">
+valence_median
+</th>
+<th style="text-align:right;">
+tempo_median
+</th>
+<th style="text-align:right;">
+loudness_median
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+1960s
+</td>
+<td style="text-align:right;">
+0.135
+</td>
+<td style="text-align:right;">
+0.0335
+</td>
+<td style="text-align:right;">
+0.0812
+</td>
+<td style="text-align:right;">
+62.033
+</td>
+<td style="text-align:right;">
+-29.467
+</td>
+<td style="text-align:right;">
+0.882
+</td>
+<td style="text-align:right;">
+0.989
+</td>
+<td style="text-align:right;">
+0.985
+</td>
+<td style="text-align:right;">
+203.081
+</td>
+<td style="text-align:right;">
+-1.969
+</td>
+<td style="text-align:right;">
+0.5549709
+</td>
+<td style="text-align:right;">
+0.5238507
+</td>
+<td style="text-align:right;">
+0.6917529
+</td>
+<td style="text-align:right;">
+120.1395
+</td>
+<td style="text-align:right;">
+-10.347255
+</td>
+<td style="text-align:right;">
+0.1464123
+</td>
+<td style="text-align:right;">
+0.1920124
+</td>
+<td style="text-align:right;">
+0.2177194
+</td>
+<td style="text-align:right;">
+27.67858
+</td>
+<td style="text-align:right;">
+3.746286
+</td>
+<td style="text-align:right;">
+0.5620
+</td>
+<td style="text-align:right;">
+0.5180
+</td>
+<td style="text-align:right;">
+0.7320
+</td>
+<td style="text-align:right;">
+118.383
+</td>
+<td style="text-align:right;">
+-10.0250
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+1970s
+</td>
+<td style="text-align:right;">
+0.191
+</td>
+<td style="text-align:right;">
+0.0264
+</td>
+<td style="text-align:right;">
+0.0772
+</td>
+<td style="text-align:right;">
+60.390
+</td>
+<td style="text-align:right;">
+-24.336
+</td>
+<td style="text-align:right;">
+0.925
+</td>
+<td style="text-align:right;">
+0.973
+</td>
+<td style="text-align:right;">
+0.981
+</td>
+<td style="text-align:right;">
+206.518
+</td>
+<td style="text-align:right;">
+-3.207
+</td>
+<td style="text-align:right;">
+0.5870377
+</td>
+<td style="text-align:right;">
+0.5561716
+</td>
+<td style="text-align:right;">
+0.6590293
+</td>
+<td style="text-align:right;">
+119.7566
+</td>
+<td style="text-align:right;">
+-10.668774
+</td>
+<td style="text-align:right;">
+0.1468679
+</td>
+<td style="text-align:right;">
+0.1887733
+</td>
+<td style="text-align:right;">
+0.2345642
+</td>
+<td style="text-align:right;">
+27.72690
+</td>
+<td style="text-align:right;">
+3.331024
+</td>
+<td style="text-align:right;">
+0.5990
+</td>
+<td style="text-align:right;">
+0.5600
+</td>
+<td style="text-align:right;">
+0.7150
+</td>
+<td style="text-align:right;">
+119.103
+</td>
+<td style="text-align:right;">
+-10.3190
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+1980s
+</td>
+<td style="text-align:right;">
+0.201
+</td>
+<td style="text-align:right;">
+0.1280
+</td>
+<td style="text-align:right;">
+0.0581
+</td>
+<td style="text-align:right;">
+59.622
+</td>
+<td style="text-align:right;">
+-20.335
+</td>
+<td style="text-align:right;">
+0.980
+</td>
+<td style="text-align:right;">
+0.989
+</td>
+<td style="text-align:right;">
+0.979
+</td>
+<td style="text-align:right;">
+205.726
+</td>
+<td style="text-align:right;">
+-1.227
+</td>
+<td style="text-align:right;">
+0.6333629
+</td>
+<td style="text-align:right;">
+0.6379684
+</td>
+<td style="text-align:right;">
+0.6428829
+</td>
+<td style="text-align:right;">
+120.6579
+</td>
+<td style="text-align:right;">
+-9.566243
+</td>
+<td style="text-align:right;">
+0.1464401
+</td>
+<td style="text-align:right;">
+0.1929307
+</td>
+<td style="text-align:right;">
+0.2494934
+</td>
+<td style="text-align:right;">
+24.78933
+</td>
+<td style="text-align:right;">
+3.272372
+</td>
+<td style="text-align:right;">
+0.6390
+</td>
+<td style="text-align:right;">
+0.6565
+</td>
+<td style="text-align:right;">
+0.7000
+</td>
+<td style="text-align:right;">
+119.014
+</td>
+<td style="text-align:right;">
+-9.1995
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+1990s
+</td>
+<td style="text-align:right;">
+0.133
+</td>
+<td style="text-align:right;">
+0.0744
+</td>
+<td style="text-align:right;">
+0.0473
+</td>
+<td style="text-align:right;">
+59.999
+</td>
+<td style="text-align:right;">
+-18.943
+</td>
+<td style="text-align:right;">
+0.978
+</td>
+<td style="text-align:right;">
+0.993
+</td>
+<td style="text-align:right;">
+0.977
+</td>
+<td style="text-align:right;">
+205.832
+</td>
+<td style="text-align:right;">
+-1.970
+</td>
+<td style="text-align:right;">
+0.6569897
+</td>
+<td style="text-align:right;">
+0.6260813
+</td>
+<td style="text-align:right;">
+0.5746123
+</td>
+<td style="text-align:right;">
+116.9076
+</td>
+<td style="text-align:right;">
+-8.682362
+</td>
+<td style="text-align:right;">
+0.1362789
+</td>
+<td style="text-align:right;">
+0.1826258
+</td>
+<td style="text-align:right;">
+0.2420759
+</td>
+<td style="text-align:right;">
+28.44851
+</td>
+<td style="text-align:right;">
+2.733472
+</td>
+<td style="text-align:right;">
+0.6740
+</td>
+<td style="text-align:right;">
+0.6410
+</td>
+<td style="text-align:right;">
+0.6010
+</td>
+<td style="text-align:right;">
+111.893
+</td>
+<td style="text-align:right;">
+-8.3420
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2000s
+</td>
+<td style="text-align:right;">
+0.209
+</td>
+<td style="text-align:right;">
+0.1320
+</td>
+<td style="text-align:right;">
+0.0395
+</td>
+<td style="text-align:right;">
+60.048
+</td>
+<td style="text-align:right;">
+-14.001
+</td>
+<td style="text-align:right;">
+0.960
+</td>
+<td style="text-align:right;">
+0.976
+</td>
+<td style="text-align:right;">
+0.967
+</td>
+<td style="text-align:right;">
+205.576
+</td>
+<td style="text-align:right;">
+-1.357
+</td>
+<td style="text-align:right;">
+0.6358968
+</td>
+<td style="text-align:right;">
+0.6956815
+</td>
+<td style="text-align:right;">
+0.5326893
+</td>
+<td style="text-align:right;">
+121.6356
+</td>
+<td style="text-align:right;">
+-5.730523
+</td>
+<td style="text-align:right;">
+0.1485781
+</td>
+<td style="text-align:right;">
+0.1521673
+</td>
+<td style="text-align:right;">
+0.2312731
+</td>
+<td style="text-align:right;">
+28.78980
+</td>
+<td style="text-align:right;">
+1.941017
+</td>
+<td style="text-align:right;">
+0.6455
+</td>
+<td style="text-align:right;">
+0.6955
+</td>
+<td style="text-align:right;">
+0.5335
+</td>
+<td style="text-align:right;">
+120.124
+</td>
+<td style="text-align:right;">
+-5.4235
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2010s
+</td>
+<td style="text-align:right;">
+0.209
+</td>
+<td style="text-align:right;">
+0.1080
+</td>
+<td style="text-align:right;">
+0.0361
+</td>
+<td style="text-align:right;">
+51.316
+</td>
+<td style="text-align:right;">
+-33.987
+</td>
+<td style="text-align:right;">
+0.964
+</td>
+<td style="text-align:right;">
+0.958
+</td>
+<td style="text-align:right;">
+0.962
+</td>
+<td style="text-align:right;">
+205.570
+</td>
+<td style="text-align:right;">
+-1.097
+</td>
+<td style="text-align:right;">
+0.6244548
+</td>
+<td style="text-align:right;">
+0.7106689
+</td>
+<td style="text-align:right;">
+0.5403599
+</td>
+<td style="text-align:right;">
+123.7818
+</td>
+<td style="text-align:right;">
+-5.468967
+</td>
+<td style="text-align:right;">
+0.1266742
+</td>
+<td style="text-align:right;">
+0.1511836
+</td>
+<td style="text-align:right;">
+0.2295782
+</td>
+<td style="text-align:right;">
+27.70019
+</td>
+<td style="text-align:right;">
+2.845803
+</td>
+<td style="text-align:right;">
+0.6370
+</td>
+<td style="text-align:right;">
+0.7410
+</td>
+<td style="text-align:right;">
+0.5450
+</td>
+<td style="text-align:right;">
+121.956
+</td>
+<td style="text-align:right;">
+-5.1190
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>kbl(Sum_Groovy)%&gt;%kable_styling(bootstrap_options =c(&quot;striped&quot;, &quot;hover&quot;))</code></pre>
+<table class="table table-striped table-hover" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+decade
+</th>
+<th style="text-align:right;">
+danceability_min
+</th>
+<th style="text-align:right;">
+energy_min
+</th>
+<th style="text-align:right;">
+valence_min
+</th>
+<th style="text-align:right;">
+tempo_min
+</th>
+<th style="text-align:right;">
+loudness_min
+</th>
+<th style="text-align:right;">
+danceability_max
+</th>
+<th style="text-align:right;">
+energy_max
+</th>
+<th style="text-align:right;">
+valence_max
+</th>
+<th style="text-align:right;">
+tempo_max
+</th>
+<th style="text-align:right;">
+loudness_max
+</th>
+<th style="text-align:right;">
+danceability_mean
+</th>
+<th style="text-align:right;">
+energy_mean
+</th>
+<th style="text-align:right;">
+valence_mean
+</th>
+<th style="text-align:right;">
+tempo_mean
+</th>
+<th style="text-align:right;">
+loudness_mean
+</th>
+<th style="text-align:right;">
+danceability_sd
+</th>
+<th style="text-align:right;">
+energy_sd
+</th>
+<th style="text-align:right;">
+valence_sd
+</th>
+<th style="text-align:right;">
+tempo_sd
+</th>
+<th style="text-align:right;">
+loudness_sd
+</th>
+<th style="text-align:right;">
+danceability_median
+</th>
+<th style="text-align:right;">
+energy_median
+</th>
+<th style="text-align:right;">
+valence_median
+</th>
+<th style="text-align:right;">
+tempo_median
+</th>
+<th style="text-align:right;">
+loudness_median
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+1960s
+</td>
+<td style="text-align:right;">
+0.135
+</td>
+<td style="text-align:right;">
+0.0335
+</td>
+<td style="text-align:right;">
+0.0812
+</td>
+<td style="text-align:right;">
+62.033
+</td>
+<td style="text-align:right;">
+-29.467
+</td>
+<td style="text-align:right;">
+0.882
+</td>
+<td style="text-align:right;">
+0.989
+</td>
+<td style="text-align:right;">
+0.985
+</td>
+<td style="text-align:right;">
+203.081
+</td>
+<td style="text-align:right;">
+-1.969
+</td>
+<td style="text-align:right;">
+0.5549709
+</td>
+<td style="text-align:right;">
+0.5238507
+</td>
+<td style="text-align:right;">
+0.6917529
+</td>
+<td style="text-align:right;">
+120.1395
+</td>
+<td style="text-align:right;">
+-10.347255
+</td>
+<td style="text-align:right;">
+0.1464123
+</td>
+<td style="text-align:right;">
+0.1920124
+</td>
+<td style="text-align:right;">
+0.2177194
+</td>
+<td style="text-align:right;">
+27.67858
+</td>
+<td style="text-align:right;">
+3.746286
+</td>
+<td style="text-align:right;">
+0.5620
+</td>
+<td style="text-align:right;">
+0.5180
+</td>
+<td style="text-align:right;">
+0.7320
+</td>
+<td style="text-align:right;">
+118.383
+</td>
+<td style="text-align:right;">
+-10.0250
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+1970s
+</td>
+<td style="text-align:right;">
+0.191
+</td>
+<td style="text-align:right;">
+0.0264
+</td>
+<td style="text-align:right;">
+0.0772
+</td>
+<td style="text-align:right;">
+60.390
+</td>
+<td style="text-align:right;">
+-24.336
+</td>
+<td style="text-align:right;">
+0.925
+</td>
+<td style="text-align:right;">
+0.973
+</td>
+<td style="text-align:right;">
+0.981
+</td>
+<td style="text-align:right;">
+206.518
+</td>
+<td style="text-align:right;">
+-3.207
+</td>
+<td style="text-align:right;">
+0.5870377
+</td>
+<td style="text-align:right;">
+0.5561716
+</td>
+<td style="text-align:right;">
+0.6590293
+</td>
+<td style="text-align:right;">
+119.7566
+</td>
+<td style="text-align:right;">
+-10.668774
+</td>
+<td style="text-align:right;">
+0.1468679
+</td>
+<td style="text-align:right;">
+0.1887733
+</td>
+<td style="text-align:right;">
+0.2345642
+</td>
+<td style="text-align:right;">
+27.72690
+</td>
+<td style="text-align:right;">
+3.331024
+</td>
+<td style="text-align:right;">
+0.5990
+</td>
+<td style="text-align:right;">
+0.5600
+</td>
+<td style="text-align:right;">
+0.7150
+</td>
+<td style="text-align:right;">
+119.103
+</td>
+<td style="text-align:right;">
+-10.3190
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+1980s
+</td>
+<td style="text-align:right;">
+0.201
+</td>
+<td style="text-align:right;">
+0.1280
+</td>
+<td style="text-align:right;">
+0.0581
+</td>
+<td style="text-align:right;">
+59.622
+</td>
+<td style="text-align:right;">
+-20.335
+</td>
+<td style="text-align:right;">
+0.980
+</td>
+<td style="text-align:right;">
+0.989
+</td>
+<td style="text-align:right;">
+0.979
+</td>
+<td style="text-align:right;">
+205.726
+</td>
+<td style="text-align:right;">
+-1.227
+</td>
+<td style="text-align:right;">
+0.6333629
+</td>
+<td style="text-align:right;">
+0.6379684
+</td>
+<td style="text-align:right;">
+0.6428829
+</td>
+<td style="text-align:right;">
+120.6579
+</td>
+<td style="text-align:right;">
+-9.566243
+</td>
+<td style="text-align:right;">
+0.1464401
+</td>
+<td style="text-align:right;">
+0.1929307
+</td>
+<td style="text-align:right;">
+0.2494934
+</td>
+<td style="text-align:right;">
+24.78933
+</td>
+<td style="text-align:right;">
+3.272372
+</td>
+<td style="text-align:right;">
+0.6390
+</td>
+<td style="text-align:right;">
+0.6565
+</td>
+<td style="text-align:right;">
+0.7000
+</td>
+<td style="text-align:right;">
+119.014
+</td>
+<td style="text-align:right;">
+-9.1995
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+1990s
+</td>
+<td style="text-align:right;">
+0.133
+</td>
+<td style="text-align:right;">
+0.0744
+</td>
+<td style="text-align:right;">
+0.0473
+</td>
+<td style="text-align:right;">
+59.999
+</td>
+<td style="text-align:right;">
+-18.943
+</td>
+<td style="text-align:right;">
+0.978
+</td>
+<td style="text-align:right;">
+0.993
+</td>
+<td style="text-align:right;">
+0.977
+</td>
+<td style="text-align:right;">
+205.832
+</td>
+<td style="text-align:right;">
+-1.970
+</td>
+<td style="text-align:right;">
+0.6569897
+</td>
+<td style="text-align:right;">
+0.6260813
+</td>
+<td style="text-align:right;">
+0.5746123
+</td>
+<td style="text-align:right;">
+116.9076
+</td>
+<td style="text-align:right;">
+-8.682362
+</td>
+<td style="text-align:right;">
+0.1362789
+</td>
+<td style="text-align:right;">
+0.1826258
+</td>
+<td style="text-align:right;">
+0.2420759
+</td>
+<td style="text-align:right;">
+28.44851
+</td>
+<td style="text-align:right;">
+2.733472
+</td>
+<td style="text-align:right;">
+0.6740
+</td>
+<td style="text-align:right;">
+0.6410
+</td>
+<td style="text-align:right;">
+0.6010
+</td>
+<td style="text-align:right;">
+111.893
+</td>
+<td style="text-align:right;">
+-8.3420
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2000s
+</td>
+<td style="text-align:right;">
+0.209
+</td>
+<td style="text-align:right;">
+0.1320
+</td>
+<td style="text-align:right;">
+0.0395
+</td>
+<td style="text-align:right;">
+60.048
+</td>
+<td style="text-align:right;">
+-14.001
+</td>
+<td style="text-align:right;">
+0.960
+</td>
+<td style="text-align:right;">
+0.976
+</td>
+<td style="text-align:right;">
+0.967
+</td>
+<td style="text-align:right;">
+205.576
+</td>
+<td style="text-align:right;">
+-1.357
+</td>
+<td style="text-align:right;">
+0.6358968
+</td>
+<td style="text-align:right;">
+0.6956815
+</td>
+<td style="text-align:right;">
+0.5326893
+</td>
+<td style="text-align:right;">
+121.6356
+</td>
+<td style="text-align:right;">
+-5.730523
+</td>
+<td style="text-align:right;">
+0.1485781
+</td>
+<td style="text-align:right;">
+0.1521673
+</td>
+<td style="text-align:right;">
+0.2312731
+</td>
+<td style="text-align:right;">
+28.78980
+</td>
+<td style="text-align:right;">
+1.941017
+</td>
+<td style="text-align:right;">
+0.6455
+</td>
+<td style="text-align:right;">
+0.6955
+</td>
+<td style="text-align:right;">
+0.5335
+</td>
+<td style="text-align:right;">
+120.124
+</td>
+<td style="text-align:right;">
+-5.4235
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2010s
+</td>
+<td style="text-align:right;">
+0.209
+</td>
+<td style="text-align:right;">
+0.1080
+</td>
+<td style="text-align:right;">
+0.0361
+</td>
+<td style="text-align:right;">
+51.316
+</td>
+<td style="text-align:right;">
+-33.987
+</td>
+<td style="text-align:right;">
+0.964
+</td>
+<td style="text-align:right;">
+0.958
+</td>
+<td style="text-align:right;">
+0.962
+</td>
+<td style="text-align:right;">
+205.570
+</td>
+<td style="text-align:right;">
+-1.097
+</td>
+<td style="text-align:right;">
+0.6244548
+</td>
+<td style="text-align:right;">
+0.7106689
+</td>
+<td style="text-align:right;">
+0.5403599
+</td>
+<td style="text-align:right;">
+123.7818
+</td>
+<td style="text-align:right;">
+-5.468967
+</td>
+<td style="text-align:right;">
+0.1266742
+</td>
+<td style="text-align:right;">
+0.1511836
+</td>
+<td style="text-align:right;">
+0.2295782
+</td>
+<td style="text-align:right;">
+27.70019
+</td>
+<td style="text-align:right;">
+2.845803
+</td>
+<td style="text-align:right;">
+0.6370
+</td>
+<td style="text-align:right;">
+0.7410
+</td>
+<td style="text-align:right;">
+0.5450
+</td>
+<td style="text-align:right;">
+121.956
+</td>
+<td style="text-align:right;">
+-5.1190
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>flipped&lt;-t(Sum_Groovy)
+kbl(flipped)%&gt;%kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;))</code></pre>
+<table class="table table-striped table-hover" style="margin-left: auto; margin-right: auto;">
+<tbody>
+<tr>
+<td style="text-align:left;">
+decade
+</td>
+<td style="text-align:left;">
+1960s
+</td>
+<td style="text-align:left;">
+1970s
+</td>
+<td style="text-align:left;">
+1980s
+</td>
+<td style="text-align:left;">
+1990s
+</td>
+<td style="text-align:left;">
+2000s
+</td>
+<td style="text-align:left;">
+2010s
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+danceability_min
+</td>
+<td style="text-align:left;">
+0.135
+</td>
+<td style="text-align:left;">
+0.191
+</td>
+<td style="text-align:left;">
+0.201
+</td>
+<td style="text-align:left;">
+0.133
+</td>
+<td style="text-align:left;">
+0.209
+</td>
+<td style="text-align:left;">
+0.209
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+energy_min
+</td>
+<td style="text-align:left;">
+0.0335
+</td>
+<td style="text-align:left;">
+0.0264
+</td>
+<td style="text-align:left;">
+0.1280
+</td>
+<td style="text-align:left;">
+0.0744
+</td>
+<td style="text-align:left;">
+0.1320
+</td>
+<td style="text-align:left;">
+0.1080
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+valence_min
+</td>
+<td style="text-align:left;">
+0.0812
+</td>
+<td style="text-align:left;">
+0.0772
+</td>
+<td style="text-align:left;">
+0.0581
+</td>
+<td style="text-align:left;">
+0.0473
+</td>
+<td style="text-align:left;">
+0.0395
+</td>
+<td style="text-align:left;">
+0.0361
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tempo_min
+</td>
+<td style="text-align:left;">
+62.033
+</td>
+<td style="text-align:left;">
+60.390
+</td>
+<td style="text-align:left;">
+59.622
+</td>
+<td style="text-align:left;">
+59.999
+</td>
+<td style="text-align:left;">
+60.048
+</td>
+<td style="text-align:left;">
+51.316
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+loudness_min
+</td>
+<td style="text-align:left;">
+-29.467
+</td>
+<td style="text-align:left;">
+-24.336
+</td>
+<td style="text-align:left;">
+-20.335
+</td>
+<td style="text-align:left;">
+-18.943
+</td>
+<td style="text-align:left;">
+-14.001
+</td>
+<td style="text-align:left;">
+-33.987
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+danceability_max
+</td>
+<td style="text-align:left;">
+0.882
+</td>
+<td style="text-align:left;">
+0.925
+</td>
+<td style="text-align:left;">
+0.980
+</td>
+<td style="text-align:left;">
+0.978
+</td>
+<td style="text-align:left;">
+0.960
+</td>
+<td style="text-align:left;">
+0.964
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+energy_max
+</td>
+<td style="text-align:left;">
+0.989
+</td>
+<td style="text-align:left;">
+0.973
+</td>
+<td style="text-align:left;">
+0.989
+</td>
+<td style="text-align:left;">
+0.993
+</td>
+<td style="text-align:left;">
+0.976
+</td>
+<td style="text-align:left;">
+0.958
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+valence_max
+</td>
+<td style="text-align:left;">
+0.985
+</td>
+<td style="text-align:left;">
+0.981
+</td>
+<td style="text-align:left;">
+0.979
+</td>
+<td style="text-align:left;">
+0.977
+</td>
+<td style="text-align:left;">
+0.967
+</td>
+<td style="text-align:left;">
+0.962
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tempo_max
+</td>
+<td style="text-align:left;">
+203.081
+</td>
+<td style="text-align:left;">
+206.518
+</td>
+<td style="text-align:left;">
+205.726
+</td>
+<td style="text-align:left;">
+205.832
+</td>
+<td style="text-align:left;">
+205.576
+</td>
+<td style="text-align:left;">
+205.570
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+loudness_max
+</td>
+<td style="text-align:left;">
+-1.969
+</td>
+<td style="text-align:left;">
+-3.207
+</td>
+<td style="text-align:left;">
+-1.227
+</td>
+<td style="text-align:left;">
+-1.970
+</td>
+<td style="text-align:left;">
+-1.357
+</td>
+<td style="text-align:left;">
+-1.097
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+danceability_mean
+</td>
+<td style="text-align:left;">
+0.5549709
+</td>
+<td style="text-align:left;">
+0.5870377
+</td>
+<td style="text-align:left;">
+0.6333629
+</td>
+<td style="text-align:left;">
+0.6569897
+</td>
+<td style="text-align:left;">
+0.6358968
+</td>
+<td style="text-align:left;">
+0.6244548
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+energy_mean
+</td>
+<td style="text-align:left;">
+0.5238507
+</td>
+<td style="text-align:left;">
+0.5561716
+</td>
+<td style="text-align:left;">
+0.6379684
+</td>
+<td style="text-align:left;">
+0.6260813
+</td>
+<td style="text-align:left;">
+0.6956815
+</td>
+<td style="text-align:left;">
+0.7106689
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+valence_mean
+</td>
+<td style="text-align:left;">
+0.6917529
+</td>
+<td style="text-align:left;">
+0.6590293
+</td>
+<td style="text-align:left;">
+0.6428829
+</td>
+<td style="text-align:left;">
+0.5746123
+</td>
+<td style="text-align:left;">
+0.5326893
+</td>
+<td style="text-align:left;">
+0.5403599
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tempo_mean
+</td>
+<td style="text-align:left;">
+120.1395
+</td>
+<td style="text-align:left;">
+119.7566
+</td>
+<td style="text-align:left;">
+120.6579
+</td>
+<td style="text-align:left;">
+116.9076
+</td>
+<td style="text-align:left;">
+121.6356
+</td>
+<td style="text-align:left;">
+123.7818
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+loudness_mean
+</td>
+<td style="text-align:left;">
+-10.347255
+</td>
+<td style="text-align:left;">
+-10.668774
+</td>
+<td style="text-align:left;">
+-9.566243
+</td>
+<td style="text-align:left;">
+-8.682362
+</td>
+<td style="text-align:left;">
+-5.730523
+</td>
+<td style="text-align:left;">
+-5.468967
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+danceability_sd
+</td>
+<td style="text-align:left;">
+0.1464123
+</td>
+<td style="text-align:left;">
+0.1468679
+</td>
+<td style="text-align:left;">
+0.1464401
+</td>
+<td style="text-align:left;">
+0.1362789
+</td>
+<td style="text-align:left;">
+0.1485781
+</td>
+<td style="text-align:left;">
+0.1266742
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+energy_sd
+</td>
+<td style="text-align:left;">
+0.1920124
+</td>
+<td style="text-align:left;">
+0.1887733
+</td>
+<td style="text-align:left;">
+0.1929307
+</td>
+<td style="text-align:left;">
+0.1826258
+</td>
+<td style="text-align:left;">
+0.1521673
+</td>
+<td style="text-align:left;">
+0.1511836
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+valence_sd
+</td>
+<td style="text-align:left;">
+0.2177194
+</td>
+<td style="text-align:left;">
+0.2345642
+</td>
+<td style="text-align:left;">
+0.2494934
+</td>
+<td style="text-align:left;">
+0.2420759
+</td>
+<td style="text-align:left;">
+0.2312731
+</td>
+<td style="text-align:left;">
+0.2295782
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tempo_sd
+</td>
+<td style="text-align:left;">
+27.67858
+</td>
+<td style="text-align:left;">
+27.72690
+</td>
+<td style="text-align:left;">
+24.78933
+</td>
+<td style="text-align:left;">
+28.44851
+</td>
+<td style="text-align:left;">
+28.78980
+</td>
+<td style="text-align:left;">
+27.70019
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+loudness_sd
+</td>
+<td style="text-align:left;">
+3.746286
+</td>
+<td style="text-align:left;">
+3.331025
+</td>
+<td style="text-align:left;">
+3.272373
+</td>
+<td style="text-align:left;">
+2.733472
+</td>
+<td style="text-align:left;">
+1.941017
+</td>
+<td style="text-align:left;">
+2.845803
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+danceability_median
+</td>
+<td style="text-align:left;">
+0.5620
+</td>
+<td style="text-align:left;">
+0.5990
+</td>
+<td style="text-align:left;">
+0.6390
+</td>
+<td style="text-align:left;">
+0.6740
+</td>
+<td style="text-align:left;">
+0.6455
+</td>
+<td style="text-align:left;">
+0.6370
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+energy_median
+</td>
+<td style="text-align:left;">
+0.5180
+</td>
+<td style="text-align:left;">
+0.5600
+</td>
+<td style="text-align:left;">
+0.6565
+</td>
+<td style="text-align:left;">
+0.6410
+</td>
+<td style="text-align:left;">
+0.6955
+</td>
+<td style="text-align:left;">
+0.7410
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+valence_median
+</td>
+<td style="text-align:left;">
+0.7320
+</td>
+<td style="text-align:left;">
+0.7150
+</td>
+<td style="text-align:left;">
+0.7000
+</td>
+<td style="text-align:left;">
+0.6010
+</td>
+<td style="text-align:left;">
+0.5335
+</td>
+<td style="text-align:left;">
+0.5450
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tempo_median
+</td>
+<td style="text-align:left;">
+118.383
+</td>
+<td style="text-align:left;">
+119.103
+</td>
+<td style="text-align:left;">
+119.014
+</td>
+<td style="text-align:left;">
+111.893
+</td>
+<td style="text-align:left;">
+120.124
+</td>
+<td style="text-align:left;">
+121.956
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+loudness_median
+</td>
+<td style="text-align:left;">
+-10.0250
+</td>
+<td style="text-align:left;">
+-10.3190
+</td>
+<td style="text-align:left;">
+-9.1995
+</td>
+<td style="text-align:left;">
+-8.3420
+</td>
+<td style="text-align:left;">
+-5.4235
+</td>
+<td style="text-align:left;">
+-5.1190
+</td>
+</tr>
+</tbody>
+</table>
+<p><em>After running summary statistics on my data I was especially interested in comparing the statistics from the danceability, energy, loudness, tempo, and valence of music across the decades. Danceability, measured on a scale from 0.0-1.0 refers to how danceable a song is based on certain characteristics such as its tempo and beat strength.Valence refers to how cheerful and positive a song is, with 1.0 being the most upbeat a song can be. I found that the 1990s had the highest average danceability, with music averaging a danceability factor of 0.657.I initially thought that the deacde with the highest danceability would consequently have music with the highest energy, loudness, tempo, and valence as well because I associate these variables as being better conditions for dancing.Instead, I found that the 2010s had the highest energy of songs on average, with 0.711. The 2010s also experienced music with the highest loudness and tempo on average. Furthermore, I found that valence was strongest in the 1960s with an average value of 0.692.Although the 1960s expereinced music with the lowest energy and danceability. This is interesting to think about the social atmosphere of the 1960s which can be characaterized as being a cultural decade filled with new ideolgies, experimentation, and music born from Woodstock.</em></p>
+<p><em>In addition to analyzing the danceable factor of music that was born out of each decade, I also wanted to analyze the artists that topped the billboard charts. I found that there were only 46 artists that were in the top 10 overall on the billboard 100 charts. I was surprised to find that out of all the observations, there were only 2 'one-hit wonders'. The Police and Daniel Powter both only made it to number 1 on the billboard charts once. After analyzing the one hit wonders from the dataset I was intrigued to see if there was any artist who made it to number 1 on the charts more than one time with the same song. I found that the only artist to do so was Adele, with her hit song, rolling in the deep. These results really shocked me because when I think about the music that was born out of the 60s, 70s, and 80s especially, I thought there would be more artists who topped the charts. Out of curiosity I wanted to see where Fleetwood Mac and Taylor Swift were at on the charts as they are popular musicians who have released several hit songs. I found that Fleetwood Mac made it on the charts for two decades, in the 1970s and 1980s, however they never had a song hit the number one spot. Similarly, with Taylor Swift, she had 14 songs over the 2000s and 2010s that made it to the top 100 charts, just not at number 1. It is also important to note that not every song from the billboard charts during these decades are listed, so this could have resulted in these odd discrepancies; still very neat to analyze nonetheless!</em></p>
+</div>
+<div id="visualizing-30-pts" class="section level4">
+<h4>4. Visualizing (30 pts)</h4>
+<pre class="r"><code>cormat &lt;- groovyjamz_new %&gt;% select_if(is.numeric) %&gt;% cor(use=&quot;pair&quot;)
+tidycor &lt;- cormat %&gt;% as.data.frame %&gt;% rownames_to_column(&quot;var1&quot;) %&gt;%
+  pivot_longer(-1,names_to=&quot;var2&quot;,values_to=&quot;correlation&quot;)
+tidycor</code></pre>
+<pre><code>## # A tibble: 169 x 3
+##    var1         var2             correlation
+##    &lt;chr&gt;        &lt;chr&gt;                  &lt;dbl&gt;
+##  1 danceability danceability          1     
+##  2 danceability energy                0.194 
+##  3 danceability key                   0.0312
+##  4 danceability loudness              0.0742
+##  5 danceability mode                 -0.180 
+##  6 danceability speechiness           0.218 
+##  7 danceability acousticness         -0.263 
+##  8 danceability instrumentalness      0.0276
+##  9 danceability liveness             -0.114 
+## 10 danceability valence               0.488 
+## # … with 159 more rows</code></pre>
+<pre class="r"><code>groovyjamz_new%&gt;%select_if(is.numeric)%&gt;%cor%&gt;%as.data.frame%&gt;%
+  rownames_to_column%&gt;%pivot_longer(-1)%&gt;%
+  ggplot(aes(rowname,name,fill=value))+ggtitle(&quot;Correlation Heatmap&quot;)+geom_tile()+
+  geom_text(aes(label=round(value,2)),size=1.5)+
+  theme(axis.text.x = element_text(angle = 90, hjust=1))+
+  xlab(&quot;&quot;)+ylab(&quot;&quot;)+coord_fixed()+
+  scale_fill_gradient2(low=&quot;pink&quot;,mid=&quot;orange&quot;,high=&quot;red&quot;)</code></pre>
+<p><img src="../../project/Knit1_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p><em>After running the correlation matrix and creating the corresponding heatmap, I found that the variables of loudness and energy as well as valence and danceability were the most highly correlated. They had correlation values of 0.68 and 0.49, respectively. These values suggest that there is a positive correlation so as loudness in a song increases, its energy levels also increase. Similarly, as the valence or positivity of a soundtrack increases, its measure of danceability also goes up.</em></p>
+<pre class="r"><code>ggplot(groovyjamz_new, aes(valence, danceability, color = decade)) + 
+  geom_line() + geom_point(color = &quot;white&quot;,size=0.5) + xlab(&quot;valence&quot;) + 
+  ylab(&quot;danceability&quot;) + ggtitle(&quot;Danceability Across the Decades!&quot;) </code></pre>
+<p><img src="../../project/Knit1_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p><em>The plot above visually depicts the danceability of songs across the decades, in relation to the valence of soundtracks. This plot suggests that as the valence of a song increases, its danceability also consequently increases (there is an upward trend). From this plot, it is evident that the decade that produced the most danceable songs were the 1990s. Considering how my current spotify playlist only contains hits from the 1990s, I cannot argue with this data!</em></p>
+<pre class="r"><code>ggplot(Sum_Groovy, aes(x = energy_mean, y = danceability_mean, fill = decade)) + geom_bar(stat = &quot;summary&quot;, fun = mean) + scale_fill_brewer(palette = &quot;Accent&quot;)+ geom_errorbar(stat = &quot;summary&quot;, fun.data = mean_se, width = .01) + scale_y_continuous(name = &quot;danceability&quot;, breaks = seq(0, 2, 0.1))+scale_x_continuous(name = &quot;energy&quot;, breaks = seq(0.5, 0.8, 0.03))+ggtitle(&quot;Change in Energy and Danceability Across the Decades&quot;)</code></pre>
+<p><img src="../../project/Knit1_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p><em>In addition to analyzing how danceability was impacted by the upbeat, valent nature of a song, I also wanted to cross reference this with the energy levels of songs. After doing so it is clear that as the energy of a song increases, its danceability typically also increases. There was slight deviance from this obeservation in the 1980s, which experienced music with higher energy but less danceability as compared with the 1990s.Similary, the early 2000s experienced music with higher danceability in relation to energy when compared with the 2010s, which had lower danceability and yet songs with higher energy.</em></p>
+</div>
+<div id="dimensionality-reduction-20-pts" class="section level4">
+<h4>5. Dimensionality Reduction (20 pts)</h4>
+<pre class="r"><code>library(cluster)
+library(GGally)</code></pre>
+<pre><code>## Registered S3 method overwritten by &#39;GGally&#39;:
+##   method from   
+##   +.gg   ggplot2</code></pre>
+<pre class="r"><code>cluster1&lt;-groovynum%&gt;%select(-decade,-artist_name)%&gt;% scale%&gt;% pam(5)</code></pre>
+<pre class="r"><code>groovynum %&gt;% mutate(cluster=as.factor(cluster1$clustering)) %&gt;% ggpairs(columns = c(&quot;danceability&quot;,&quot;energy&quot;,&quot;valence&quot;,&quot;tempo&quot;,&quot;loudness&quot;), aes(color=cluster))</code></pre>
+<p><img src="../../project/Knit1_files/figure-html/unnamed-chunk-9-1.png" width="672" /> <em>The plot above visually depicts the correlations between the numeric variables that were clustered together. It is evident that the strongest correlation exists between loudness and energy, with a significant positive correlation of 0.685.This emphasizes that as a song's overall amplitude increases, its intensity also goes up. In contrast to this, the weakest correlation is between valence and loudness. This suggests that as a music's overall loudness in decibels increases, characteristics of the track that might make it more positive and upbeat is not more or less likely to occur.</em></p>
+<pre class="r"><code>ggplot(groovynum, aes(x=tempo,y=danceability, color=decade))+geom_point()</code></pre>
+<p><img src="../../project/Knit1_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p><em>The plot above is representative of the clusters of tempo plotted against danceability, measured by the decade. A k value of 5 gave me the highest silhouette average, however it is worth noting that my data did not produce separate and distinct clusters as can be seen above. This re-emphasizes that there was not a strong correlation between the tempo of songs and how danceable they were. This can be assumed across all of the decades.</em></p>
+<pre class="r"><code>cluster1$silinfo$avg.width</code></pre>
+<pre><code>## [1] 0.2113274</code></pre>
+<pre class="r"><code>plot(cluster1,which=2)</code></pre>
+<p><img src="../../project/Knit1_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p><em>The silhouette plot above suggests that there is not a strong relationship between the clustered varaibles. This can be determined based on the average silhouette width that resulted after running this clustering analysis. The average silhouette width value of 0.21 denotes not even a weak structure is present. It instead suggests that there was not a substantial structure that could be found, hence the lacking visual above.</em></p>
+</div>
+</div>
+</div>
+
+            
+        <hr>         <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div> 
+            </div>
+          </div>
+
+   <hr>  <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> 
+        </div>
+      </div>
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="../../js/docs.min.js"></script>
+<script src="../../js/main.js"></script>
+
+<script src="../../js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>

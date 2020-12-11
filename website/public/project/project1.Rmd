@@ -1,0 +1,162 @@
+---
+title: "Billboard Music Trends Across the Decades"
+date: "2020-12-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Krystal Virk
+
+*For my final project in biostatistics, I collected data from people's spotify history to see if there was any relationship between how introverted or extroverted someone was in relation to how much time they spent listening to music. Music has always been such a constant force in my life, especially during this time of uncertainity due to the pandemic. I grew up listeining to groovy songs from Fleetwood Mac, Lionel Richie, and Celine Dion to name a few of my musical influences thanks to my parents! After being assigned this project I knew I wanted to continue with this music theme and analyze data from billboard charts over the years. Both of the datasets I used were found online because I was really interested in analyzing data over the span of a few decades and the billboard dataset preloaded in r did not fit my desired criteria. The first dataset I included was the spotify track data dataset that I found which contains information from the top charts from the past decades. This dataset includes several descriptive variables such as the artist, song title, and the year the song was charted, in addition to specific characteristiscs of the songs such as danceability, energy, and tempo. The second dataset that I used for my project was the wiki hot 100s dataset which included data from the Billboard Hot 100 charts from 1960-2016! This dataset ony included four variables: the artist, title of the song, year it was charted, and its rank on the billboard charts. I had the idea to join these two datasets to first determine how many songs were similar between the two datasets. After identifying and narrowing down the similar songs across both billboard charts, I was interested in seeing if there was any discrepancy in danceability across the decades. I set out to find whether danceabiity differed in the popular music across the decades!I was also intrigued to see if any artists charted the Billboard Hot 100s for longer than one decade, and on the opposite end of this spectrum, I was curious to see if any artists were simply One-hit wonders during their time. Music has evolved so much over the years and I know I am constantly hearing from my parents how the music that is played on the pop radio today does not compare to the music made by the creative geniuses of their childhood. I had so much fun being able to apply the concepts we have been learning in class to analyze some truly groovy music data (this was the inspiration for my newly named dataset!)*
+
+
+
+```{r}
+install.packages("billboard", repos = "http://cran.us.r-project.org")
+library(billboard)
+songs_data <- spotify_track_data
+library(tidyverse)
+billboard_raw <- as_tibble(wiki_hot_100s)
+library(dplyr)
+view(songs_data)
+view(billboard_raw)
+
+```
+
+
+#### 1. Tidying: Rearranging Wide/Long 
+```{r}
+install.packages("billboard", repos = "http://cran.us.r-project.org")
+library(billboard)
+songs_data <- spotify_track_data
+library(tidyverse)
+billboard_raw <- as_tibble(wiki_hot_100s)
+library(dplyr)
+view(songs_data)
+view(billboard_raw)
+
+```
+
+*My dataset was already tidy, therefore I included the pivot(longer) and pivot(wider) functions later in my data analysis.*
+
+
+#### 2. Joining/Merging 
+
+```{r}
+head(songs_data)
+head(billboard_raw)
+names(billboard_raw)[2] <- "track_name"
+names(billboard_raw)[3] <- "artist_name"
+groovyjamz<-songs_data %>% inner_join(billboard_raw, by=c("track_name","artist_name"))
+view(groovyjamz)
+```
+
+*I joined my two datasets using the inner join type function. I used the inner join rather than the left, right, or semi-join type function because the inner join works to merge two datsets based on commonalities between columns. For my data analysis, I created a new dataset that only included the list of songs from the Billboard Hot 100 charts that were similar across both datatsets. Using the innerjoin, I was able to combine the two datasets using the columns for the artist of the song, as well as the name of the song. The inner join is able to recognize that my data was to be combined using those specific columns in the dataset, and it only joined the rows of data that matched across both sets of data. Therefore, an inner join was ideal to use for this data analysis. The cases that were dropped following this join were those songs that did not appear in both of the datasets. The billboard dataset initially contained 5,701 obersvations and 4 variables whereas the songs dataset had 5,497 observations and 23 variables. After merging the datasets, only 2,781 observations and 25 variables remained.The reason for this is because one of the datasets I used was scraped so that there was a randomly generated amount of songs from billboard charts included, hence the reason for this variation across two datasets for the Billboard charts. I initially only joined my datasets using the similar column of track name because I assumed that the best way to ensure only the same charting songs across both sets of data was to use the specific song title, rather than the name of the artist as many artists are on the charts for mutiple songs. I quickly realized that I could not only join using song title because there was overlap between artists who had songs on the top charts with the same name. After seeing Elvis Presley and Lionel Richie's "Stuck on You" combined I quickly realized I needed to update my join! This was just a fun realization I made that made me appreciate the difficulty and satisfaction of applying these concepts we have learned in class to real life data!*
+
+#### 3. Wrangling 
+
+
+```{r}
+r = getOption("repos")
+r["CRAN"] = "http://cran.us.r-project.org"
+options(repos = r)
+
+groovyjamz%>%summarize_all(n_distinct)
+groovyjamz %>% filter(complete.cases(groovyjamz))
+colnames(groovyjamz)[1]  <- "decade"
+groovyjamz_new<-mutate(groovyjamz, decade = case_when(decade<1970 ~"1960s", decade<1980~"1970s", decade<1990~"1980s", decade<2000~"1990s", decade<2010~"2000s", decade>=2010~"2010s"))
+groovyjamz_new%>%group_by(decade)%>%summarize_if(is.numeric,c(mean=mean,sd=sd),na.rm=T) 
+groovyjamz_new%>% add_count(artist_name)
+groovyjamz_new %>% add_count(artist_name) %>% filter(no <= 10) %>%arrange(desc(year.y))%>%select(decade,no,everything()) 
+groovyjamz_new %>% add_count(artist_name) %>% filter(no == 1, n== 1) 
+groovyjamz_new %>% filter(no == 1) %>% add_count(artist_name)%>%filter(n>1) 
+groovyjamz_new%>%filter(artist_name== "Fleetwood Mac")%>%select(no, everything())
+groovyjamz_new%>%filter(artist_name== "Taylor Swift")%>%select(no, everything())
+summary(groovyjamz_new)
+groovyjamz_long<-groovyjamz_new%>% summarize_if(is.numeric, list(min=min,max=max,mean=mean,sd=sd,median=median),na.rm=T)%>%pivot_longer(danceability_min:time_signature_median)
+groovyjamz_long%>% pivot_wider(names_from=name, values_from=value) 
+groovynum<-groovyjamz_new%>% select(decade,artist_name,danceability, energy, valence, tempo, loudness)                                                                                
+Sum_Groovy<-groovynum%>%group_by(decade)%>%summarize_if(is.numeric,list(min=min,max=max,mean=mean,sd=sd,median=median),na.rm=T)
+install.packages("kableExtra")
+library(kableExtra)
+kbl(Sum_Groovy)
+kbl(Sum_Groovy)%>%kable_styling(bootstrap_options =c("striped", "hover"))
+flipped<-t(Sum_Groovy)
+kbl(flipped)%>%kable_styling(bootstrap_options = c("striped", "hover"))
+
+```
+
+*After running summary statistics on my data I was especially interested in comparing the statistics from the danceability, energy, loudness, tempo, and valence of music across the decades. Danceability, measured on a scale from 0.0-1.0 refers to how danceable a song is based on certain characteristics such as its tempo and beat strength.Valence refers to how cheerful and positive a song is, with 1.0 being the most upbeat a song can be. I found that the 1990s had the highest average danceability, with music averaging a danceability factor of 0.657.I initially thought that the deacde with the highest danceability would consequently have music with the highest energy, loudness, tempo, and valence as well because I associate these variables as being better conditions for dancing.Instead, I found that the 2010s had the highest energy of songs on average, with 0.711. The 2010s also experienced music with the highest loudness and tempo on average. Furthermore, I found that valence was strongest in the 1960s with an average value of 0.692.Although the 1960s expereinced music with the lowest energy and danceability. This is interesting to think about the social atmosphere of the 1960s which can be characaterized as being a cultural decade filled with new ideolgies, experimentation, and music born from Woodstock.* 
+
+*In addition to analyzing the danceable factor of music that was born out of each decade, I also wanted to analyze the artists that topped the billboard charts. I found that there were only 46 artists that were in the top 10 overall on the billboard 100 charts. I was surprised to find that out of all the observations, there were only 2 'one-hit wonders'. The Police and Daniel Powter both only made it to number 1 on the billboard charts once. After analyzing the one hit wonders from the dataset I was intrigued to see if there was any artist who made it to number 1 on the charts more than one time with the same song. I found that the only artist to do so was Adele, with her hit song, rolling in the deep. These results really shocked me because when I think about the music that was born out of the 60s, 70s, and 80s especially, I thought there would be more artists who topped the charts. Out of curiosity I wanted to see where Fleetwood Mac and Taylor Swift were at on the charts as they are popular musicians who have released several hit songs. I found that Fleetwood Mac made it on the charts for two decades, in the 1970s and 1980s, however they never had a song hit the number one spot. Similarly, with Taylor Swift, she had 14 songs over the 2000s and 2010s that made it to the top 100 charts, just not at number 1. It is also important to note that not every song from the billboard charts during these decades are listed, so this could have resulted in these odd discrepancies; still very neat to analyze nonetheless!*  
+
+#### 4. Visualizing 
+
+```{r}
+cormat <- groovyjamz_new %>% select_if(is.numeric) %>% cor(use="pair")
+tidycor <- cormat %>% as.data.frame %>% rownames_to_column("var1") %>%
+  pivot_longer(-1,names_to="var2",values_to="correlation")
+tidycor
+groovyjamz_new%>%select_if(is.numeric)%>%cor%>%as.data.frame%>%
+  rownames_to_column%>%pivot_longer(-1)%>%
+  ggplot(aes(rowname,name,fill=value))+ggtitle("Correlation Heatmap")+geom_tile()+
+  geom_text(aes(label=round(value,2)),size=1.5)+
+  theme(axis.text.x = element_text(angle = 90, hjust=1))+
+  xlab("")+ylab("")+coord_fixed()+
+  scale_fill_gradient2(low="pink",mid="orange",high="red")
+
+
+```
+
+*After running the correlation matrix and creating the corresponding heatmap, I found that the variables of loudness and energy as well as valence and danceability were the most highly correlated. They had correlation values of 0.68 and 0.49, respectively. These values suggest that there is a positive correlation so as loudness in a song increases, its energy levels also increase. Similarly, as the valence or positivity of a soundtrack increases, its measure of danceability also goes up.*
+
+```{r}
+ggplot(groovyjamz_new, aes(valence, danceability, color = decade)) + 
+  geom_line() + geom_point(color = "white",size=0.5) + xlab("valence") + 
+  ylab("danceability") + ggtitle("Danceability Across the Decades!") 
+
+```
+
+*The plot above visually depicts the danceability of songs across the decades, in relation to the valence of soundtracks. This plot suggests that as the valence of a song increases, its danceability also consequently increases (there is an upward trend). From this plot, it is evident that the decade that produced the most danceable songs were the 1990s. Considering how my current spotify playlist only contains hits from the 1990s, I cannot argue with this data!*
+
+```{r}
+ggplot(Sum_Groovy, aes(x = energy_mean, y = danceability_mean, fill = decade)) + geom_bar(stat = "summary", fun = mean) + scale_fill_brewer(palette = "Accent")+ geom_errorbar(stat = "summary", fun.data = mean_se, width = .01) + scale_y_continuous(name = "danceability", breaks = seq(0, 2, 0.1))+scale_x_continuous(name = "energy", breaks = seq(0.5, 0.8, 0.03))+ggtitle("Change in Energy and Danceability Across the Decades")
+```
+
+*In addition to analyzing how danceability was impacted by the upbeat, valent nature of a song, I also wanted to cross reference this with the energy levels of songs. After doing so it is clear that as the energy of a song increases, its danceability typically also increases. There was slight deviance from this obeservation in the 1980s, which experienced music with higher energy but less danceability as compared with the 1990s.Similary, the early 2000s experienced music with higher danceability in relation to energy when compared with the 2010s, which had lower danceability and yet songs with higher energy.*
+
+#### 5. Dimensionality Reduction 
+
+```{r}
+library(cluster)
+library(GGally)
+cluster1<-groovynum%>%select(-decade,-artist_name)%>% scale%>% pam(5)
+
+```
+
+```{r}
+groovynum %>% mutate(cluster=as.factor(cluster1$clustering)) %>% ggpairs(columns = c("danceability","energy","valence","tempo","loudness"), aes(color=cluster))
+
+```
+*The plot above visually depicts the correlations between the numeric variables that were clustered together. It is evident that the strongest correlation exists between loudness and energy, with a significant positive correlation of 0.685.This emphasizes that as a song's overall amplitude increases, its intensity also goes up. In contrast to this, the weakest correlation is between valence and loudness. This suggests that as a music's overall loudness in decibels increases, characteristics of the track that might make it more positive and upbeat is not more or less likely to occur.*  
+
+```{r}
+ggplot(groovynum, aes(x=tempo,y=danceability, color=decade))+geom_point()
+
+```
+
+*The plot above is representative of the clusters of tempo plotted against danceability, measured by the decade. A k value of 5 gave me the highest silhouette average, however it is worth noting that my data did not produce separate and distinct clusters as can be seen above. This re-emphasizes that there was not a strong correlation between the tempo of songs and how danceable they were. This can be assumed across all of the decades.*
+
+```{r}
+
+cluster1$silinfo$avg.width
+plot(cluster1,which=2)
+```
+
+*The silhouette plot above suggests that there is not a strong relationship between the clustered varaibles. This can be determined based on the average silhouette width that resulted after running this clustering analysis. The average silhouette width value of 0.21 denotes not even a weak structure is present. It instead suggests that there was not a substantial structure that could be found, hence the lacking visual above.*
+
+
+
